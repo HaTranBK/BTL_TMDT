@@ -1,8 +1,8 @@
 import React from "react";
-import SignUpForm from "../components/SignUpForm/SignUpForm.jsx";
+import LoginForm from "../components/LoginForm/LoginForm.jsx";
 import { Link } from "react-router-dom";
 
-const SignUpPage = () => {
+const LoginPage = () => {
   return (
     <div className="max-h-screen ">
       <div className="flex max-w-full bg-white">
@@ -24,19 +24,19 @@ const SignUpPage = () => {
         </div>
         <div className="flex flex-col items-center justify-center w-1/2 p-5">
           <div className="flex flex-col items-start w-full max-w-md p-5">
-            <h1 className="text-4xl font-medium text-gray-900">Sign up</h1>
+            <h1 className="text-4xl font-medium text-gray-900">Sign In</h1>
             <p className="mt-4 text-lg text-gray-700">
-              Already have an account?{" "}
-              <Link to={"/login"} className="text-blue-400">
-                Sign in
+              Don't have an account?{" "}
+              <Link to={"/signup"} className="text-blue-500">
+                Sign up
               </Link>
             </p>
           </div>
-          <SignUpForm />
+          <LoginForm />
         </div>
       </div>
     </div>
   );
 };
 
-export default SignUpPage;
+export default LoginPage;

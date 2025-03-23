@@ -1,7 +1,7 @@
 import { useRoutes } from "react-router-dom";
-import Login from "../pages/Login.jsx";
 import HomePage from "../pages/HomePage.jsx";
 import SignUpPage from "../pages/SignUpPage.jsx";
+import LoginPage from "../pages/LoginPage.jsx";
 
 const customRoute = () => {
   let route = useRoutes([
@@ -15,7 +15,7 @@ const customRoute = () => {
     },
     {
       path: "/login",
-      element: <Login />,
+      element: <LoginPage />,
     },
   ]);
   return route;
