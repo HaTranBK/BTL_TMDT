@@ -4,7 +4,11 @@ import * as yup from "yup";
 import { useFormik } from "formik";
 const SignUpForm = () => {
   const [showPassword, setShowPassword] = useState(false);
-
+  const [checked, setChecked] = useState(false);
+  const handleChecked = (e) => {
+    const { checked } = e.target;
+    setChecked(checked);
+  };
   const { values, errors, handleChange, handleBlur, handleSubmit, touched } =
     useFormik({
       initialValues: {
@@ -12,7 +16,6 @@ const SignUpForm = () => {
         username: "",
         email: "",
         password: "",
-        checked: false,
       },
       onSubmit: async (values) => {
         console.log("values in useformik: ", values);
@@ -128,11 +131,9 @@ const SignUpForm = () => {
         <input
           type="checkbox"
           name="agreement"
-          checked={values.checked}
-          onChange={handleChange}
-          onBlur={handleBlur}
+          checked={checked}
+          onChange={handleChecked}
           className="w-4 h-4"
-          value={values.checked}
         />
         <label className="text-gray-700">
           I agree with{" "}
@@ -146,8 +147,17 @@ const SignUpForm = () => {
         </label>
       </div>
       <button
-        className="w-full max-w-md px-4 py-2 mt-4 text-white bg-green-600 rounded hover:bg-green-500"
+        className={`w-full max-w-md px-4 py-2 mt-4 text-white  rounded ${
+          Object.keys(errors).length > 0 ||
+          Object.values(values).some((value) => !value)
+            ? "bg-gray-300"
+            : "bg-green-600 hover:bg-green-500"
+        }`}
         type="submit"
+        disabled={
+          Object.keys(errors).length > 0 ||
+          Object.values(values).some((value) => !value)
+        }
       >
         Sign Up
       </button>
