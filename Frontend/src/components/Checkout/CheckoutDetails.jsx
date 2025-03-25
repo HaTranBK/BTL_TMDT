@@ -56,7 +56,7 @@ const CheckoutDetails = ({ onNext }) => {
                             </div>
                             <div className="mb-4">
                                 <select className="border rounded-[6px] p-2 w-full">
-                                    <option>Country</option>
+                                    <option>Vietnam</option>
                                 </select>
                             </div>
                             <div className="mb-4">
@@ -90,7 +90,7 @@ const CheckoutDetails = ({ onNext }) => {
                             </div>
 
                         </div>
-                        <button className="bg-black text-white w-full h-[48px] rounded-[8px] py-2">Place Order</button>
+                        <button onClick={onNext} className="bg-black text-white w-full h-[48px] rounded-[8px] py-2">Place Order</button>
                     </div>
                     <div className="p-4 rounded-[6px] border-[1px] border-[#6C7275] w-[413px] h-fit">
                         <h2 className="text-xl font-bold mb-4">Order summary</h2>

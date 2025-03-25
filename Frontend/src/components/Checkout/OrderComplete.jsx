@@ -37,10 +37,47 @@ const OrderComplete = () => {
                         </div>
                     </div>
                 </div>
-                <div className='w-[1120px] my-[80px] flex gap-[80px]'>
-                    <button>Purchase History</button>
+                <div className='w-full flex justify-center mt-[80px]'>
+                    <div className="bg-white p-8 rounded-[8px] shadow-lg w-[738px] text-center">
+                        <h1 className="text-3xl text-[#6C7275] font-medium mb-4">Thank you! 🎉</h1>
+                        <h2 className="text-4xl font-medium mb-12">Your order has been received</h2>
+                        <div className="flex justify-center space-x-4 mb-10">
+                            <div className="relative">
+                                <img src="https://placehold.co/100x100" alt="Black side table" className="w-24 h-24 object-cover rounded-md" />
+                                <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">2</span>
+                            </div>
+                            <div className="relative">
+                                <img src="https://placehold.co/100x100" alt="Red side table" className="w-24 h-24 object-cover rounded-md" />
+                                <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">2</span>
+                            </div>
+                            <div className="relative">
+                                <img src="https://placehold.co/100x100" alt="Lamp" className="w-24 h-24 object-cover rounded-md" />
+                                <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">1</span>
+                            </div>
+                        </div>
+                        <div className='flex justify-center'>
+                            <div className="text-left mb-10  w-[268px]">
+                                <div className="flex justify-between mb-2">
+                                    <span className="font-medium">Order code:</span>
+                                    <span>#0123_45678</span>
+                                </div>
+                                <div className="flex justify-between mb-2">
+                                    <span className="font-medium">Date:</span>
+                                    <span>October 19, 2023</span>
+                                </div>
+                                <div className="flex justify-between mb-2">
+                                    <span className="font-medium">Total:</span>
+                                    <span>$1,345.00</span>
+                                </div>
+                                <div className="flex justify-between mb-2">
+                                    <span className="font-medium">Payment method:</span>
+                                    <span>Credit Card</span>
+                                </div>
+                            </div>
+                        </div>
+                        <button className="bg-black w-[203px] h-[52px] text-white py-2 px-4 rounded-full">Purchase history</button>
+                    </div>
                 </div>
-
             </div>
         </div>
     );
