@@ -1,0 +1,110 @@
+
+export const mockProducts = [ 
+  {
+    id: 'eco_pen_set_001',
+    name: 'Set 10 Bút Bi Vỏ Tre Thân Thiện',
+    category: 'Bút',
+    image: 'https://ozeo.vn/wp-content/uploads/2019/01/but-bi-bang-tre-gia-re-BP5283-2048x1995.jpg', 
+    price: 75000,
+    originalPrice: 90000,
+    rating: 4.7,
+    reviewsCount: 112,
+    isNew: true,
+    discount: '17%',
+    ecoBadge: 'Vỏ tre tự nhiên',
+    shortDescription: 'Bộ 10 bút bi mực xanh, vỏ làm từ tre tự nhiên, thân thiện với môi trường, cầm nhẹ tay.'
+  },
+  {
+    id: 'handmade_notebook_002',
+    name: 'Sổ Tay Bìa Vải Canvas Handmade "Nature Touch"',
+    category: 'Sổ & Vở',
+    image: 'https://cdn.chus.vn/images/thumbnails/767/767/detailed/271/314727321_651718222961187_1218302062690381747_n.jpg', 
+    price: 165000,
+    originalPrice: 200000,
+    rating: 4.9,
+    reviewsCount: 158,
+    isNew: true,
+    discount: '18%',
+    ecoBadge: 'Làm thủ công',
+    shortDescription: 'Sổ tay A5 bìa vải canvas thô mộc, may thủ công tỉ mỉ, giấy không axit, 120 trang.'
+  },
+  {
+    id: 'recycled_pencil_case_003',
+    name: 'Hộp Bút Vải Jean Tái Chế Đa Năng',
+    category: 'Dụng cụ học tập',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lll1852xhscc47@resize_w900_nl.webp', 
+    price: 89000,
+    originalPrice: 110000,
+    rating: 4.5,
+    reviewsCount: 75,
+    isNew: false,
+    discount: '19%',
+    ecoBadge: 'Vải jean tái chế',
+    shortDescription: 'Hộp bút làm từ vải jean tái chế, thiết kế đơn giản, bền chắc, nhiều ngăn tiện lợi.'
+  },
+  {
+    id: 'eco_highlighter_set_004',
+    name: 'Bộ Bút Đánh Dấu 6 Màu Pastel Mực Nước An Toàn',
+    category: 'Bút',
+    image: 'https://ozeo.vn/wp-content/uploads/2019/01/but-bi-bang-tre-gia-re-BP5283-2048x1995.jpg', 
+    price: 110000,
+    rating: 4.6,
+    reviewsCount: 92,
+    isNew: true,
+    ecoBadge: 'Mực không độc hại',
+    shortDescription: 'Set 6 bút đánh dấu màu pastel dịu mắt, mực gốc nước an toàn, thân thiện với người dùng.'
+  },
+  {
+    id: 'kraft_spiral_notebook_005',
+    name: 'Sổ Lò Xo Bìa Kraft A5 "Simple Life"',
+    category: 'Sổ & Vở',
+    image: 'https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-m041yoyh4z2n56.webp', 
+    price: 45000,
+    rating: 4.3,
+    reviewsCount: 203,
+    isNew: false,
+    ecoBadge: 'Giấy tái chế',
+    shortDescription: 'Sổ lò xo A5 bìa giấy kraft, 100 trang giấy tái chế, thiết kế tối giản, phù hợp ghi chép nhanh.'
+  },
+  {
+    id: 'eco_tote_bag_006',
+    name: 'Túi Vải Tote "Go Green" In Hình Lá Cây',
+    category: 'Túi & Balo',
+    image: 'https://ozeo.vn/wp-content/uploads/2019/01/but-bi-bang-tre-gia-re-BP5283-2048x1995.jpg', 
+    price: 130000,
+    originalPrice: 150000,
+    rating: 4.8,
+    reviewsCount: 130,
+    isNew: true,
+    discount: '13%',
+    ecoBadge: 'Vải canvas hữu cơ',
+    shortDescription: 'Túi tote vải canvas hữu cơ, in họa tiết lá cây độc đáo, rộng rãi, tiện dụng cho sinh viên.'
+  },
+  {
+    id: 'bamboo_desk_organizer_007',
+    name: 'Khay Để Đồ Đa Năng Bằng Tre Ép',
+    category: 'Dụng cụ học tập',
+    image: 'https://ozeo.vn/wp-content/uploads/2019/01/but-bi-bang-tre-gia-re-BP5283-2048x1995.jpg', 
+    price: 199000,
+    rating: 4.7,
+    reviewsCount: 68,
+    isNew: false,
+    ecoBadge: 'Tre tự nhiên',
+    shortDescription: 'Khay sắp xếp đồ dùng học tập bằng tre ép, nhiều ngăn, giúp bàn học gọn gàng, ngăn nắp.'
+  },
+  {
+    id: 'reusable_water_bottle_008',
+    name: 'Bình Nước Inox Giữ Nhiệt "Student Refresh"',
+    category: 'Dụng cụ học tập', 
+    image: 'https://ozeo.vn/wp-content/uploads/2019/01/but-bi-bang-tre-gia-re-BP5283-2048x1995.jpg', 
+    price: 250000,
+    originalPrice: 300000,
+    rating: 4.9,
+    reviewsCount: 215,
+    isNew: true,
+    discount: '17%',
+    ecoBadge: 'Thép không gỉ 304',
+    shortDescription: 'Bình nước inox 500ml giữ nhiệt nóng lạnh, an toàn, bền đẹp, thay thế chai nhựa dùng một lần.'
+  }
+];
+
