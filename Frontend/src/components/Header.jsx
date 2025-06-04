@@ -1,8 +1,10 @@
 import React from 'react';
 import logo from '../assets/logo.png';
 import { Search, User, ShoppingCart } from "lucide-react";
+import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
+  const navigate = useNavigate();
   return (
     <header className="text-white py-3 px-4 flex items-center justify-between md:px-40" style={{ backgroundColor: '#179A4E' }} >
       
@@ -20,9 +22,13 @@ export default function Header() {
       <div className="flex items-center space-x-4  lg:space-x-8">
         <button className="text-lg md:text-base" aria-label="search">
           <Search className="w-5 h-5" /></button>
-        <button className="text-lg md:text-base" aria-label="profile">
+        <button 
+          onClick={() => navigate('/myaccount')}
+          className="text-lg md:text-base" aria-label="profile">
           <User className="w-5 h-5" /></button>
-        <button className="text-lg md:text-base" aria-label="cart">
+        <button 
+          onClick={() => navigate('/checkout')}
+          className="text-lg md:text-base" aria-label="cart">
           <ShoppingCart className="w-5 h-5" />
           {/* <span className="ml-1">2</span> */}
         </button>
