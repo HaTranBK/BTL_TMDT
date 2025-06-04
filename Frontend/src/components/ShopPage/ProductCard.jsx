@@ -36,7 +36,7 @@ export default function ProductCard({ product }) {
       return;
     }
     try {
-      const response = await fetch(`/api/cart`, {
+      const response = await fetch(`/api/carts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
