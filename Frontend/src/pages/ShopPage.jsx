@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useSearchParams} from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer'; 
 import ProductCard from '../components/ShopPage/ProductCard';
@@ -10,44 +11,132 @@ import heroImageFromFile from '../assets/Hero.png';
 
 export default function ShopPage() {
   //const productsToDisplay = mockProducts;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialCategory = searchParams.get('category') || 'all';
+  const rawPrice = searchParams.get('price');
+  const initialPriceRanges = rawPrice && rawPrice !== 'price_all'
+    ? rawPrice.split(',')
+    : ['price_all'];
+
+  const [category, setCategory] = useState(initialCategory);
+  const [priceRangeIds, setPriceRangeIds] = useState(initialPriceRanges);
+  
   const [products, setProducts] = useState([]);
-  const [filter, setFilter] = useState({}); //categories, priceRange
   const [sort, setSort] = useState('default'); // default, price_asc, price_desc, newest, rating_desc
   const [viewType, setViewType] = useState('grid'); // 'grid' hoặc 'list'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [page, setPage] = useState(1); // Trang hiện tại
+  const [hasMoreProducts, setHasMoreProducts] = useState(true); // Kiểm tra có còn sản phẩm để load thêm
+
+  const getPriceFilter = () => {
+    if (priceRangeIds.includes('price_all')) {
+      return {};
+    }
+    const priceMap = {
+      price_1: { max: 50000 },
+      price_2: { min: 50000, max: 200000 },
+      price_3: { min: 200000 },
+    };
+
+    const selected = priceRangeIds.filter(id => id !== 'price_all');
+    const mins = selected.map(id => priceMap[id]?.min).filter(Boolean);
+    const maxs = selected.map(id => priceMap[id]?.max).filter(Boolean);
+    return {
+      minPrice: mins.length > 0 ? Math.min(...mins) : undefined,
+      maxPrice: maxs.length > 0 ? Math.max(...maxs) : undefined,
+    };
+  };
+
+  // Fetch sản phẩm theo filter state category, priceRangeIds
+  const fetchFilteredProducts = async (reset = true) => {
+    setLoading(true);
+    setError(null);
+
+    const params = new URLSearchParams();
+    const priceFilter = getPriceFilter();
+
+    if (category !== 'all') params.append('categoryId', category);
+    if (priceFilter.minPrice !== undefined) params.append('minPrice', priceFilter.minPrice);
+    if (priceFilter.maxPrice !== undefined) params.append('maxPrice', priceFilter.maxPrice);
+
+    params.append('page', page);
+    params.append('limit', 12); // Giới hạn số sản phẩm mỗi trang
+    const url = `https://be-tm-t.onrender.com/Products/filter?${params.toString()}`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('Lỗi khi fetch sản phẩm');
+      const data = await res.json();
+      if (Array.isArray(data)) {
+        setProducts(prev => reset ? data : [...prev, ...data]);
+        setHasMoreProducts(data.length >= 12); 
+      }
+      else {
+        throw new Error('Dữ liệu trả về không hợp lệ');
+      }
+      //setProducts(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleLoadMore = () => {
+    setPage(prev => prev + 1);
+  };
+  useEffect(() => {
+    if (page === 1) return;
+    fetchFilteredProducts(false); // false để không reset sản phẩm đã có
+  }, [page]);
+  // const selectedCategory = searchParams.get('category') || 'all';
+  // const selectedPriceRanges = searchParams.get('price')
+  //   ? searchParams.get('price').split(',')
+  //   : ['price_all'];
 
   useEffect(() => {
-    const token = localStorage.getItem('accessToken');
-    // if (!token) {
-    //   setError("Bạn cần đăng nhập để xem sản phẩm.");
-    //   setLoading(false);
-    //   return;
-    // }
+    // Cập nhật URL
+    const params = {};
+    if (category && category !== 'all') params.category = category;
+    if (priceRangeIds && !priceRangeIds.includes('price_all')) {
+      params.price = priceRangeIds.join(',');
+    } else {
+      params.price = 'price_all';
+    }
+    setSearchParams(params);
+    setPage(1); // Reset về trang 1 khi thay đổi filter
+    fetchFilteredProducts(true);
+  }, [category, priceRangeIds, setSearchParams]);
 
-    fetch('/api/Products', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token && { 'Authorization': `Bearer ${token}` })
-      }
-    })
-      .then(response => {
-        if (!response.ok) throw new Error("Lỗi khi fetch sản phẩm");
-        // console.log(response);
-        return response.json();
-      })
-      .then(data => {
-        setProducts(data);
-        setLoading(false);
-      })
-      .catch(err => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, []);
+  const updateFilters = (newCategory, newPriceRanges) => {
+    setCategory(newCategory);
+    setPriceRangeIds(newPriceRanges);
+  };  
 
-  const totalProducts = products.length;
+  // useEffect(() => {
+  //   const token = localStorage.getItem('accessToken');
+  //   fetch('/api/Products', {
+  //     method: 'GET',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //       ...(token && { 'Authorization': `Bearer ${token}` })
+  //     }
+  //   })
+  //     .then(response => {
+  //       if (!response.ok) throw new Error("Lỗi khi fetch sản phẩm");
+  //       // console.log(response);
+  //       return response.json();
+  //     })
+  //     .then(data => {
+  //       setProducts(data);
+  //       setLoading(false);
+  //     })
+  //     .catch(err => {
+  //       setError(err.message);
+  //       setLoading(false);
+  //     });
+  // }, []);
 
   return (
     // === Khung Chính Của Trang ===
@@ -79,12 +168,16 @@ export default function ShopPage() {
           
           {/* Thanh Lọc Sản Phẩm */}
           <div className="w-72 sticky top-8 self-start">
-            <FilterSidebar />
+            <FilterSidebar
+              selectedCategory={category}
+              selectedPriceRanges={priceRangeIds}
+              onApply={updateFilters}
+            />
           </div>
           
           {/* Khu Vực Chính Hiển Thị Sản Phẩm và Điều Khiển */}
           <div className="flex-1">
-            <ShopControlsBar totalProducts={totalProducts} />
+          <ShopControlsBar totalProducts={products.length} />
 
             {loading ? (
               <p className='text-center text-gray-500'> Đang tải sản phẩm...  </p>
@@ -109,7 +202,7 @@ export default function ShopPage() {
                 <button 
                     type="button"
                     className="px-8 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-green active:scale-95"
-                    onClick={() => console.log("Xử lý logic Xem Thêm...")}
+                    onClick={(handleLoadMore) => console.log("Xử lý logic Xem Thêm...")}
                 >
                     Xem Thêm Sản Phẩm
                 </button>
