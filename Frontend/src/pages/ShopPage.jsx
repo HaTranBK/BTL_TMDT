@@ -22,7 +22,7 @@ export default function ShopPage() {
   const [priceRangeIds, setPriceRangeIds] = useState(initialPriceRanges);
   
   const [products, setProducts] = useState([]);
-  const [sort, setSort] = useState('default'); // default, price_asc, price_desc, newest, rating_desc
+  const [selectedSort, setSelectedSort] = useState('default'); // default, price_asc, price_desc
   const [viewType, setViewType] = useState('grid'); // 'grid' hoặc 'list'
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -114,6 +114,14 @@ export default function ShopPage() {
     setPriceRangeIds(newPriceRanges);
   };  
 
+  const sortedProducts = [...products].sort((a, b) => {
+    if (selectedSort === 'price_asc') return a.price - b.price;
+    if (selectedSort === 'price_desc') return b.price - a.price;
+    //if (selectedSort === 'rating_desc') return b.rating - a.rating;
+    return 0; // 'default'
+  });
+
+
   // useEffect(() => {
   //   const token = localStorage.getItem('accessToken');
   //   fetch('/api/Products', {
@@ -177,7 +185,11 @@ export default function ShopPage() {
           
           {/* Khu Vực Chính Hiển Thị Sản Phẩm và Điều Khiển */}
           <div className="flex-1">
-          <ShopControlsBar totalProducts={products.length} />
+          <ShopControlsBar 
+            totalProducts={products.length}
+            selectedSort={selectedSort}
+            setSelectedSort={setSelectedSort}
+          />
 
             {loading ? (
               <p className='text-center text-gray-500'> Đang tải sản phẩm...  </p>
@@ -186,7 +198,7 @@ export default function ShopPage() {
             )  : (
                 <div className="grid grid-cols-3 gap-x-6 gap-y-8">
                 {products.length > 0 ? (
-                  products.map(product => (
+                  sortedProducts.map(product => (
                     <ProductCard key={product.id} product={product} />
                   ))
                 ) : (
