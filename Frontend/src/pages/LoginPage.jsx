@@ -1,8 +1,48 @@
-import React from "react";
+import React, { useState } from "react";
 import LoginForm from "../components/LoginForm/LoginForm.jsx";
-import { Link } from "react-router-dom";
+import HomePage from './HomePage.jsx';
+import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogin = async (formData) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const response = await fetch('https://be-tm-t.onrender.com/Users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        // Save token to localStorage or context
+        localStorage.setItem('token', data.data.token);
+        localStorage.setItem('user', JSON.stringify(data.data.user));
+        
+        // Redirect to home page or dashboard
+        navigate('./HomePage.jsx');
+      } else {
+        setError(data.message || "Email hoặc mật khẩu không đúng");
+      }
+    } catch (err) {
+      setError("Đã xảy ra lỗi khi đăng nhập. Vui lòng thử lại.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="max-h-screen ">
       <div className="flex max-w-full bg-white">
@@ -31,8 +71,13 @@ const LoginPage = () => {
                 Sign up
               </Link>
             </p>
+            {error && (
+              <div className="mt-4 text-red-500">
+                {error}
+              </div>
+            )}
           </div>
-          <LoginForm />
+          <LoginForm onSubmit={handleLogin} loading={loading} />
         </div>
       </div>
     </div>
