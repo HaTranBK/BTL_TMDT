@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Header from '../components/Header';
 import Footer from '../components/Footer'; 
 import ProductCard from '../components/ShopPage/ProductCard';
@@ -9,8 +9,45 @@ import { mockProducts } from '../data/mockProducts';
 import heroImageFromFile from '../assets/Hero.png';
 
 export default function ShopPage() {
-  const productsToDisplay = mockProducts;
-  const totalProducts = productsToDisplay.length;
+  //const productsToDisplay = mockProducts;
+  const [products, setProducts] = useState([]);
+  const [filter, setFilter] = useState({}); //categories, priceRange
+  const [sort, setSort] = useState('default'); // default, price_asc, price_desc, newest, rating_desc
+  const [viewType, setViewType] = useState('grid'); // 'grid' hoặc 'list'
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem('accessToken');
+    // if (!token) {
+    //   setError("Bạn cần đăng nhập để xem sản phẩm.");
+    //   setLoading(false);
+    //   return;
+    // }
+
+    fetch('/api/Products', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(token && { 'Authorization': `Bearer ${token}` })
+      }
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Lỗi khi fetch sản phẩm");
+        // console.log(response);
+        return response.json();
+      })
+      .then(data => {
+        setProducts(data);
+        setLoading(false);
+      })
+      .catch(err => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, []);
+
+  const totalProducts = products.length;
 
   return (
     // === Khung Chính Của Trang ===
@@ -49,7 +86,38 @@ export default function ShopPage() {
           <div className="flex-1">
             <ShopControlsBar totalProducts={totalProducts} />
 
-            <div className="grid grid-cols-3 gap-x-6 gap-y-8">
+            {loading ? (
+              <p className='text-center text-gray-500'> Đang tải sản phẩm...  </p>
+            ) : error ? (
+              <p className='text-center text-red-500'>Lỗi: {error}</p>
+            )  : (
+                <div className="grid grid-cols-3 gap-x-6 gap-y-8">
+                {products.length > 0 ? (
+                  products.map(product => (
+                    <ProductCard key={product.id} product={product} />
+                  ))
+                ) : (
+                  <p className="col-span-full text-center text-gray-500 text-lg py-10">
+                    Không tìm thấy sản phẩm nào phù hợp.
+                  </p>
+                )}
+              </div>
+            )}
+
+            {products.length > 0 && !loading && (
+              <div className="text-center mt-10 pt-6 border-t border-gray-200">
+                <button 
+                    type="button"
+                    className="px-8 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-green active:scale-95"
+                    onClick={() => console.log("Xử lý logic Xem Thêm...")}
+                >
+                    Xem Thêm Sản Phẩm
+                </button>
+              </div>
+              
+            )}
+
+            {/* <div className="grid grid-cols-3 gap-x-6 gap-y-8">
               {productsToDisplay.length > 0 ? (
                 productsToDisplay.map(product => (
                   <ProductCard key={product.id} product={product} />
@@ -71,7 +139,7 @@ export default function ShopPage() {
                         Xem Thêm Sản Phẩm
                     </button>
                 </div>
-            )}
+            )} */}
           </div>
         </div>
       </main>

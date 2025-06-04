@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StarIcon, ShoppingCartIcon, HeartIcon, SearchIcon } from 'lucide-react';
 
 const formatCurrency = (amount) => {
@@ -7,12 +8,18 @@ const formatCurrency = (amount) => {
 
 export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   let discountPercentage = product.discount;
   if (!discountPercentage && product.originalPrice && product.price && product.originalPrice > product.price) {
     const diff = product.originalPrice - product.price;
     discountPercentage = Math.round((diff / product.originalPrice) * 100) + '%';
   }
+
+  const handleCardClick = () => {
+    navigate(`../product/${product.id}`); // Chuyển hướng đến trang chi tiết sản phẩm
+    console.log(`Navigating to product detail for ${product.name}`);
+  };
 
   const handleActionClick = (e, actionMessage) => {
     e.stopPropagation();
@@ -22,6 +29,7 @@ export default function ProductCard({ product }) {
   return (
     // === Card Container ===
     <div
+      onClick={handleCardClick}
       className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl transform hover:-translate-y-1 group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
