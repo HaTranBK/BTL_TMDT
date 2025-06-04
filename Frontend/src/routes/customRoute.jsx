@@ -3,23 +3,23 @@ import { useRoutes } from "react-router-dom";
 import HomePage from "../pages/HomePage.jsx";
 import SignUpPage from "../pages/SignUpPage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
-import MyAccount from "../pages/MyAccountPage.jsx"; 
+import MyAccount from "../pages/MyAccountPage.jsx";
 import ShopPage from "../pages/ShopPage.jsx";
-import ProductDetailPage from "../pages/ProductDetailPage.jsx"; 
-
-const CustomRoute = () => { 
+import ProductDetailPage from "../pages/ProductDetailPage.jsx";
+import UserProfilePage from "../pages/UserProfilePage.jsx";
+const CustomRoute = () => {
   let routeElements = useRoutes([
     {
       path: "/",
       element: <HomePage />,
     },
     {
-      path: "/shop", 
+      path: "/shop",
       element: <ShopPage />,
     },
     {
       path: "/signup",
-      element: <SignUpPage />, 
+      element: <SignUpPage />,
     },
     {
       path: "/login",
@@ -27,14 +27,17 @@ const CustomRoute = () => {
     },
     {
       path: "/myaccount",
-      element: <MyAccount />, 
-    },
-  
-    {
-      path: "/product/:productId", 
-      element: <ProductDetailPage />,
+      element: <MyAccount />,
     },
 
+    {
+      path: "/product/:productId",
+      element: <ProductDetailPage />,
+    },
+    {
+      path: "/profile",
+      element: <UserProfilePage />,
+    }
   ]);
   return routeElements;
 };

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import LoginForm from "../components/LoginForm/LoginForm.jsx";
-import HomePage from './HomePage.jsx';
+import ShopPage from "./ShopPage.jsx";
 import { Link, useNavigate } from "react-router-dom";
 
 const LoginPage = () => {
@@ -32,7 +32,7 @@ const LoginPage = () => {
         localStorage.setItem('user', JSON.stringify(data.data.user));
         
         // Redirect to home page or dashboard
-        navigate('./HomePage.jsx');
+        navigate('/shop');
       } else {
         setError(data.message || "Email hoặc mật khẩu không đúng");
       }
