@@ -5,6 +5,8 @@ import CheckoutDetails from '../components/Checkout/CheckoutDetails';
 import OrderComplete from '../components/Checkout/OrderComplete';
 
 const Checkout = () => {
+    // localStorage.setItem('token', '');
+
     const [step, setStep] = useState('shopping-cart');
 
     const handleNextStep = () => {
@@ -14,9 +16,9 @@ const Checkout = () => {
 
     return (
         <>
-        {step === 'shopping-cart' && <ShoppingCart onNext={handleNextStep} />}
-        {step === 'checkout-details' && <CheckoutDetails onNext={handleNextStep} />}
-        {step === 'order-complete' && <OrderComplete onNext={handleNextStep} />}
+            {step === 'shopping-cart' && <ShoppingCart onNext={handleNextStep} />}
+            {step === 'checkout-details' && <CheckoutDetails onNext={handleNextStep} />}
+            {step === 'order-complete' && <OrderComplete onNext={handleNextStep} />}
         </>
     );
 };

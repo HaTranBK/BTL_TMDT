@@ -1,6 +1,6 @@
 import React from 'react'
 import { useState, useEffect } from 'react';
-// import checkSolid from '../../assets/check-solid.svg'
+
 
 const ShoppingCart = ({ onNext }) => {
     const [selectedShipping, setSelectedShipping] = useState("free-shipping");
@@ -16,10 +16,17 @@ const ShoppingCart = ({ onNext }) => {
     }, []);
 
     const fetchCart = async () => {
+        const token = localStorage.getItem('token');
         try {
-            const response = await fetch("https://673760e4aafa2ef222339c88.mockapi.io/cart"); // Thay URL API thực tế
+            setLoading(true);
+            const response = await fetch(`https://be-tm-t.onrender.com/carts`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
             const data = await response.json();
-            setCart(data);
+            setCart(data.data.cart.Products);
         } catch (error) {
             console.error("Error fetching cart:", error);
         } finally {
@@ -27,54 +34,97 @@ const ShoppingCart = ({ onNext }) => {
         }
     };
 
-    const updateQuantity = async (id, newQuantity) => {
+    const handleIncrease = async (id, currentQuantity) => {
+        const token = localStorage.getItem('token');
+        const newQuantity = currentQuantity + 1;
         try {
-            await fetch(`https://673760e4aafa2ef222339c88.mockapi.io/cart/${id}`, {
-                method: "PUT",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ quantity: newQuantity })
+            await fetch(`https://be-tm-t.onrender.com/carts`, {
+                method: "POST",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    productId: id,
+                    quantity: 1,
+                })
             });
 
-            // Cập nhật state sau khi gọi API thành công
             setCart(prevCart =>
                 prevCart.map(item =>
                     item.id === id ? { ...item, quantity: newQuantity } : item
                 )
             );
         } catch (error) {
-            console.error("Error updating quantity:", error);
+            console.error("Error increasing quantity:", error);
         }
     };
 
-    const handleIncrease = (id, currentQuantity) => {
-        const newQuantity = currentQuantity + 1;
-        updateQuantity(id, newQuantity);
-    };
-
-    const handleDecrease = (id, currentQuantity) => {
+    const handleDecrease = async (id, currentQuantity) => {
+        const token = localStorage.getItem('token');
         if (currentQuantity > 1) {
             const newQuantity = currentQuantity - 1;
-            updateQuantity(id, newQuantity);
+            try {
+                await fetch(`https://be-tm-t.onrender.com/carts/${id}`, {
+                    method: "PATCH",
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ quantity: 1 })
+                });
+
+                setCart(prevCart =>
+                    prevCart.map(item =>
+                        item.id === id ? { ...item, quantity: newQuantity } : item
+                    )
+                );
+            } catch (error) {
+                console.error("Error decreasing quantity:", error);
+            }
         }
+    };
+
+    const handleDeleteProduct = async (id) => {
+        const token = localStorage.getItem('token');
+        try {
+            await fetch(`https://be-tm-t.onrender.com/carts/${id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            setCart(prevCart => prevCart.filter(item => item.id !== id));
+        } catch (error) {
+            console.error("Error deleting product:", error);
+        }
+    };
+
+    const formatNumber = (num) => {
+        if (typeof num !== "number") num = Number(num);
+        return num.toLocaleString('vi-VN');
     };
 
     const calculateSubtotal = (price, quantity) => {
-        return (parseFloat(price) * quantity).toFixed(2); // Giữ 2 chữ số thập phân
+        return (parseFloat(price) * quantity); // Giữ 2 chữ số thập phân
     };
 
-    const cartSubTotal = cart.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0).toFixed(2);
+    const cartSubTotal = cart.reduce((total, item) => total + parseFloat(item.price) * item.quantity, 0);
 
     const fetchShippingOptions = async () => {
         try {
-            const response = await fetch("https://673760e4aafa2ef222339c88.mockapi.io/shipping-fee"); // Thay URL API thực tế
+            setLoading(true);
+            const response = await fetch("https://673760e4aafa2ef222339c88.mockapi.io/shipping-fee");
             const data = await response.json();
             setShippingOptions(data);
 
             // Lấy phí vận chuyển của phương thức mặc định ban đầu
-            const defaultShipping = data.find(option => option.id === "free-shipping");
-            setShippingFee(defaultShipping ? parseFloat(defaultShipping.fee) : 0);
+            setShippingFee(0);
         } catch (error) {
             console.error("Error fetching shipping options:", error);
+        } finally {
+            setLoading(false);
         }
     };
 
@@ -83,9 +133,19 @@ const ShoppingCart = ({ onNext }) => {
         setShippingFee(parseFloat(fee));
     };
 
-    const totalPay = (parseFloat(cartSubTotal) + shippingFee).toFixed(2);
+    const totalPay = (parseFloat(cartSubTotal) + shippingFee);
 
-    if (loading) return <p>Loading cart...</p>;
+    if (loading) return (
+        <div className="flex justify-center items-center h-64">
+            <div role="status">
+                <svg aria-hidden="true" class="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                </svg>
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    );
 
     return (
         <div className="mx-[160px] my-[80px] flex justify-center">
@@ -135,11 +195,16 @@ const ShoppingCart = ({ onNext }) => {
                                         <div className="flex">
                                             <img src={item.image} alt="Tray Table - Black" className="w-12 h-auto mr-4 object-contain" />
                                             <div>
-                                                <p>{item.name}</p>
-                                                <p className="text-gray-500">{item.variant}</p>
+                                                <p
+                                                    className="max-w-[180px] truncate"
+                                                    title={item.name}
+                                                >
+                                                    {item.name}
+                                                </p>
+                                                {/* <p className="text-gray-500">{item.variant}</p> */}
                                                 <button className="text-red-500">
                                                     <i className="fa-solid fa-xmark"></i>
-                                                    <span className='pl-2'>Remove</span>
+                                                    <span onClick={() => handleDeleteProduct(item.id)} className='pl-2'>Remove</span>
                                                 </button>
                                             </div>
                                         </div>
@@ -154,80 +219,20 @@ const ShoppingCart = ({ onNext }) => {
                                         </div>
                                     </td>
                                     <td className="py-2 px-4 border-b">
-                                        <span className='flex justify-center'>${item.price}</span>
+                                        <span className='flex justify-center'>{formatNumber(item.price)}</span>
                                     </td>
                                     <td className="py-2 px-4 border-b">
-                                        <span className='flex justify-center font-bold'>${calculateSubtotal(item.price, item.quantity)}</span>
+                                        <span className='flex justify-center font-bold'>{formatNumber(calculateSubtotal(item.price, item.quantity))}</span>
                                     </td>
                                 </tr>
                             ))}
-                            {/* < tr >
-                                <td className="py-2 px-4 border-b">
-                                    <div className="flex">
-                                        <img src="https://placehold.co/50x50" alt="Tray Table - Red" className="w-12 h-12 mr-4" />
-                                        <div>
-                                            <p>Tray Table</p>
-                                            <p className="text-gray-500">Color: Red</p>
-                                            <button className="text-red-500">
-                                                <i className="fa-solid fa-xmark"></i>
-                                                <span className='pl-2'>Remove</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="py-2 px-4 border-b">
-                                    <div className='flex justify-center'>
-                                        <div className="w-fit rounded-[6px] border-[1px] border-[#6C7275]">
-                                            <button className="px-2 py-1">-</button>
-                                            <span className="px-2">2</span>
-                                            <button className="px-2 py-1">+</button>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="py-2 px-4 border-b">
-                                    <span className='flex justify-center'>$19.00</span>
-                                </td>
-                                <td className="py-2 px-4 border-b">
-                                    <span className='flex justify-center font-bold'>$38.00</span>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td className="py-2 px-4 border-b">
-                                    <div className="flex">
-                                        <img src="https://placehold.co/50x50" alt="Table Lamp - Gold" className="w-12 h-12 mr-4" />
-                                        <div>
-                                            <p>Table Lamp</p>
-                                            <p className="text-gray-500">Color: Gold</p>
-                                            <button className="text-red-500">
-                                                <i className="fa-solid fa-xmark"></i>
-                                                <span className='pl-2'>Remove</span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="py-2 px-4 border-b">
-                                    <div className='flex justify-center'>
-                                        <div className="w-fit rounded-[6px] border-[1px] border-[#6C7275]">
-                                            <button className="px-2 py-1">-</button>
-                                            <span className="px-2">1</span>
-                                            <button className="px-2 py-1">+</button>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td className="py-2 px-4 border-b">
-                                    <span className='flex justify-center'>$39.00</span>
-                                </td>
-                                <td className="py-2 px-4 border-b">
-                                    <span className='flex justify-center font-bold'>$39.00</span>
-                                </td>
-                            </tr> */}
                         </tbody>
                     </table>
                     <div className="p-4 rounded-[6px] border-[1px] border-[#6C7275] w-[413px]">
                         <h2 className="text-xl font-bold mb-4">Cart summary</h2>
 
                         {/* Free Shipping */}
-                        {shippingOptions.map(option => (
+                        {/* {shippingOptions.map(option => (
                             <div
                                 key={option.id}
                                 className={`mb-[12px] flex items-center gap-2 p-[14px] border-2 rounded-md ${selectedShipping === option.id ? "border-black" : "border-gray-400"}`}
@@ -245,54 +250,35 @@ const ShoppingCart = ({ onNext }) => {
                                 </label>
                                 <span>+${option.fee}</span>
                             </div>
+                        ))} */}
+                        {shippingOptions.map(option => (
+                            <div
+                                key={option.id}
+                                className={`mb-[12px] flex items-center gap-2 p-[14px] border-2 rounded-md ${selectedShipping === option.id ? "border-black" : "border-gray-400"}`}
+                            >
+                                <input
+                                    type="radio"
+                                    id={option.id}
+                                    name="shipping"
+                                    className="cursor-pointer"
+                                    checked={selectedShipping === option.id}
+                                    onChange={() => handleShippingChange(option.id, option.fee)}
+                                />
+                                <label htmlFor={option.id} className="flex-1 cursor-pointer">
+                                    {option.name}
+                                </label>
+                                <span>+{formatNumber(option.fee)}</span>
+                            </div>
                         ))}
-
-                        {/* Express Shipping */}
-                        {/* <div
-                            className={`mb-[12px] flex items-center gap-2 p-[14px] border-2 rounded-md ${selectedShipping === "express-shipping" ? "border-black" : "border-gray-400"
-                                }`}
-                        >
-                            <input
-                                type="radio"
-                                id="express-shipping"
-                                name="shipping"
-                                className="cursor-pointer"
-                                checked={selectedShipping === "express-shipping"}
-                                onChange={() => setSelectedShipping("express-shipping")}
-                            />
-                            <label htmlFor="express-shipping" className="flex-1 cursor-pointer">
-                                Express shipping
-                            </label>
-                            <span>+$15.00</span>
-                        </div> */}
-
-                        {/* Pick Up */}
-                        {/* <div
-                            className={`mb-[12px] flex items-center gap-2 p-[14px] border-2 rounded-md ${selectedShipping === "pick-up" ? "border-black" : "border-gray-400"
-                                }`}
-                        >
-                            <input
-                                type="radio"
-                                id="pick-up"
-                                name="shipping"
-                                className="cursor-pointer"
-                                checked={selectedShipping === "pick-up"}
-                                onChange={() => setSelectedShipping("pick-up")}
-                            />
-                            <label htmlFor="pick-up" className="flex-1 cursor-pointer">
-                                Pick Up
-                            </label>
-                            <span>+$21.00</span>
-                        </div> */}
 
                         <div className="mt-2 mb-[32px] pt-2">
                             <div className="border-b flex justify-between py-[13px]">
                                 <span>Subtotal</span>
-                                <span>${cartSubTotal}</span>
+                                <span>{formatNumber(cartSubTotal)}VND</span>
                             </div>
                             <div className="flex justify-between font-bold py-[13px] text-[20px]">
                                 <span>Total</span>
-                                <span>${totalPay}</span>
+                                <span>{formatNumber(totalPay)}VND</span>
                             </div>
                         </div>
 
