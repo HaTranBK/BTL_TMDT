@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import avatar from "../../assets/user-avatar.png";
+import UserProfilePage from "../../pages/UserProfilePage";
 
 export default function Menu() {
   const [showAccountPopup, setShowAccountPopup] = useState(false);
@@ -37,8 +38,8 @@ export default function Menu() {
 
   const handleAccountClick = () => {
     fetchProfile();
-    setShowAccountPopup(true);
-    setShowAddressPopup(false);
+    UserProfilePage(true);
+    //setUserProfilePage(false);
   };
 
   const handleAddressClick = () => {
