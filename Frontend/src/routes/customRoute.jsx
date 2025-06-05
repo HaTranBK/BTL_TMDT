@@ -6,7 +6,8 @@ import LoginPage from "../pages/LoginPage.jsx";
 import MyAccount from "../pages/MyAccountPage.jsx"; 
 import Checkout from "../pages/Checkout.jsx";
 import ShopPage from "../pages/ShopPage.jsx";
-import ProductDetailPage from "../pages/ProductDetailPage.jsx"; 
+import ProductDetailPage from "../pages/ProductDetailPage.jsx";
+import UserProfilePage from "../pages/UserProfilePage.jsx";
 
 const CustomRoute = () => {
   let routeElements = useRoutes([
@@ -34,7 +35,6 @@ const CustomRoute = () => {
       path: "/myaccount",
       element: <MyAccount />,
     },
-
     {
       path: "/product/:productId",
       element: <ProductDetailPage />,
