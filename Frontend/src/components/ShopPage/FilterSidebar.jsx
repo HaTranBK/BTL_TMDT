@@ -42,64 +42,8 @@ function FilterSection({ title, children }) {
 
 
 export default function FilterSidebar({selectedCategory,selectedPriceRanges,onApply,}) {
-  // State để lưu trữ lựa chọn hiện tại 
   const [category, setCategory] = useState(selectedCategory);
   const [priceRangeIds, setPriceRangeIds] = useState(selectedPriceRanges);
-  //const [products, setProducts] = useState([]); 
-  
-  // const getPriceFilter = () => {
-  // // Lấy các khoảng giá đã chọn (ngoại trừ 'price_all')
-  //   const selectedRanges = priceRanges.filter(
-  //     pr => selectedPriceRanges.includes(pr.id) && pr.range !== null
-  //   );
-
-  //   if (selectedRanges.length === 0) {
-  //     // Không lọc theo giá
-  //     return {};
-  //   }
-
-  //   // Tính minPrice là min của các min có trong khoảng chọn
-  //   const minPrice = selectedRanges.reduce((min, r) => {
-  //     if (r.range.min !== undefined && r.range.min < min) return r.range.min;
-  //     return min;
-  //   }, Infinity);
-
-  //   // Tính maxPrice là max của các max có trong khoảng chọn
-  //   const maxPrice = selectedRanges.reduce((max, r) => {
-  //     if (r.range.max !== undefined && r.range.max > max) return r.range.max;
-  //     return max;
-  //   }, -Infinity);
-
-  //   return {
-  //     minPrice: minPrice === Infinity ? undefined : minPrice,
-  //     maxPrice: maxPrice === -Infinity ? undefined : maxPrice,
-  //   };
-  // };
-
-  // const fetchFilteredProducts = async () => {
-  //   const priceFilter = getPriceFilter();
-  //   const params = new URLSearchParams();
-
-  //   if (selectedCategory !== 'all') {
-  //     params.append('categoryId', selectedCategory);
-  //   }
-  //   if (priceFilter.minPrice !== undefined) {
-  //     params.append('minPrice', priceFilter.minPrice);
-  //   }
-  //   if (priceFilter.maxPrice !== undefined) {
-  //     params.append('maxPrice', priceFilter.maxPrice);
-  //   }
-
-  //   //const url = `https://be-tm-t.onrender.com/Products/filter?${params.toString()}`;
-
-  //   try {
-  //     const response = await fetch(`https://be-tm-t.onrender.com/Products/filter?${params.toString()}`);
-  //     const data = await response.json();
-  //     onFilter?.(data); //callback để truyền dữ liệu sản phẩm đã lọc lên component cha
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
 
   useEffect(() => {
     setCategory(selectedCategory);
@@ -182,21 +126,6 @@ export default function FilterSidebar({selectedCategory,selectedPriceRanges,onAp
             Áp Dụng Lọc 
         </button>
       </div>
-      
-      {/* <div className="mt-8">
-        <h3 className="text-lg font-semibold text-gray-800 mb-3">Kết quả:</h3>
-        {products.length === 0 ? (
-          <p className="text-sm text-gray-500">Không có sản phẩm phù hợp.</p>
-        ) : (
-          <ul className="space-y-2 text-sm">
-            {products.map(product => (
-              <li key={product.id} className="text-gray-700">
-                • {product.name} ({product.price.toLocaleString('vi-VN')}₫)
-              </li>
-            ))}
-          </ul>
-        )}
-      </div> */}
     </aside>
   );
 }

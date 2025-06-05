@@ -17,7 +17,7 @@ export default function ProductCard({ product }) {
   }
 
   const handleCardClick = () => {
-    navigate(`../product/${product.id}`); // Chuyển hướng đến trang chi tiết sản phẩm
+    navigate(`/product/${product.id}`); // Chuyển hướng đến trang chi tiết sản phẩm
     console.log(`Navigating to product detail for ${product.name}`);
   };
 
@@ -28,7 +28,7 @@ export default function ProductCard({ product }) {
 
   const handleAddToCart = async (e, productId) => {
     e.stopPropagation();
-    const token = localStorage.getItem('accessToken');
+    const token = localStorage.getItem('token');
 
     if (!token) {
       console.error('No access token found. Please log in first.');
@@ -55,6 +55,11 @@ export default function ProductCard({ product }) {
     } catch (error) {
       console.error('Error adding product to cart:', error);
     }
+    if (response.ok) {
+      toast.success('Đã thêm vào giỏ hàng');
+    } else {
+      toast.error('Không thể thêm vào giỏ');
+    }     
   }
 
   return (

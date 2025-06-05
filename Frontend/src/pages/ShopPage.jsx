@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams} from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import Header from '../components/Header';
 import Footer from '../components/Footer'; 
 import ProductCard from '../components/ShopPage/ProductCard';
@@ -9,9 +10,17 @@ import Newsletter from '../components/Common/Newsletter';
 import { mockProducts } from '../data/mockProducts';
 import heroImageFromFile from '../assets/Hero.png';
 
+function useQuery() {
+  return new URLSearchParams(useLocation().search);
+}
+
 export default function ShopPage() {
   //const productsToDisplay = mockProducts;
+  const query = useQuery();
+  //const searchKeyword = query.get('q') || '';
   const [searchParams, setSearchParams] = useSearchParams();
+  const location = useLocation();
+const [searchKeyword, setSearchKeyword] = useState('');
   const initialCategory = searchParams.get('category') || 'all';
   const rawPrice = searchParams.get('price');
   const initialPriceRanges = rawPrice && rawPrice !== 'price_all'
@@ -28,28 +37,33 @@ export default function ShopPage() {
   const [error, setError] = useState(null);
   const [page, setPage] = useState(1); // Trang hiện tại
   const [hasMoreProducts, setHasMoreProducts] = useState(true); // Kiểm tra có còn sản phẩm để load thêm
+  
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    setSearchKeyword(params.get('q') || '');
+  }, [location])
 
-  const getPriceFilter = () => {
-    if (priceRangeIds.includes('price_all')) {
-      return {};
-    }
-    const priceMap = {
-      price_1: { max: 50000 },
-      price_2: { min: 50000, max: 200000 },
-      price_3: { min: 200000 },
+    const getPriceFilter = () => {
+      if (priceRangeIds.includes('price_all')) {
+        return {};
+      }
+      const priceMap = {
+        price_1: { max: 50000 },
+        price_2: { min: 50000, max: 200000 },
+        price_3: { min: 200000 },
+      };
+
+      const selected = priceRangeIds.filter(id => id !== 'price_all');
+      const mins = selected.map(id => priceMap[id]?.min).filter(Boolean);
+      const maxs = selected.map(id => priceMap[id]?.max).filter(Boolean);
+      return {
+        minPrice: mins.length > 0 ? Math.min(...mins) : undefined,
+        maxPrice: maxs.length > 0 ? Math.max(...maxs) : undefined,
+      };
     };
 
-    const selected = priceRangeIds.filter(id => id !== 'price_all');
-    const mins = selected.map(id => priceMap[id]?.min).filter(Boolean);
-    const maxs = selected.map(id => priceMap[id]?.max).filter(Boolean);
-    return {
-      minPrice: mins.length > 0 ? Math.min(...mins) : undefined,
-      maxPrice: maxs.length > 0 ? Math.max(...maxs) : undefined,
-    };
-  };
-
-  // Fetch sản phẩm theo filter state category, priceRangeIds
-  const fetchFilteredProducts = async (reset = true) => {
+  //Fetch sản phẩm theo filter state category, priceRangeIds
+  const fetchFilteredProducts = async (pageToFetch, reset = true) => {
     setLoading(true);
     setError(null);
 
@@ -60,7 +74,7 @@ export default function ShopPage() {
     if (priceFilter.minPrice !== undefined) params.append('minPrice', priceFilter.minPrice);
     if (priceFilter.maxPrice !== undefined) params.append('maxPrice', priceFilter.maxPrice);
 
-    params.append('page', page);
+    params.append('page', pageToFetch); // Trang hiện tại
     params.append('limit', 12); // Giới hạn số sản phẩm mỗi trang
     const url = `https://be-tm-t.onrender.com/Products/filter?${params.toString()}`;
 
@@ -83,35 +97,106 @@ export default function ShopPage() {
     }
   };
 
-  const handleLoadMore = () => {
-    setPage(prev => prev + 1);
-  };
   useEffect(() => {
-    if (page === 1) return;
-    fetchFilteredProducts(false); // false để không reset sản phẩm đã có
-  }, [page]);
-  // const selectedCategory = searchParams.get('category') || 'all';
-  // const selectedPriceRanges = searchParams.get('price')
-  //   ? searchParams.get('price').split(',')
-  //   : ['price_all'];
+    // Nếu có từ khóa tìm kiếm thì tìm theo searchKeyword, xóa filter khỏi URL
+    if (searchKeyword.trim() !== '') {
+      setLoading(true);
+      setError(null);
 
-  useEffect(() => {
-    // Cập nhật URL
-    const params = {};
-    if (category && category !== 'all') params.category = category;
-    if (priceRangeIds && !priceRangeIds.includes('price_all')) {
-      params.price = priceRangeIds.join(',');
+      // Cập nhật URL chỉ có q
+      //setSearchParams({ q: searchKeyword });
+
+      fetch(`https://be-tm-t.onrender.com/Products/search?q=${encodeURIComponent(searchKeyword)}`)
+        .then(res => {
+          if (!res.ok) throw new Error('Lỗi khi tìm kiếm sản phẩm');
+          return res.json();
+        })
+        .then(data => {
+          setProducts(data);
+          setHasMoreProducts(false);
+          setPage(1);
+        })
+        .catch(err => setError(err.message))
+        .finally(() => setLoading(false));
     } else {
-      params.price = 'price_all';
+      // Nếu không có từ khóa tìm kiếm thì gọi API filter
+      // Cập nhật URL chỉ có category + price
+      const params = {};
+      if (category && category !== 'all') params.category = category;
+      if (priceRangeIds && !priceRangeIds.includes('price_all')) {
+        params.price = priceRangeIds.join(',');
+      } else {
+        params.price = 'price_all';
+      }
+      //setSearchParams(params);
+
+      // Reset page để load lại từ đầu
+      setPage(1);
+      fetchFilteredProducts(1, true);
     }
-    setSearchParams(params);
-    setPage(1); // Reset về trang 1 khi thay đổi filter
-    fetchFilteredProducts(true);
-  }, [category, priceRangeIds, setSearchParams]);
+  }, [searchKeyword, category, priceRangeIds]);
+
+  const handleLoadMore = () => {
+    if (!loading && hasMoreProducts) {
+      setPage(prev => prev + 1);
+    }
+  };
+
+// Trong useEffect
+  useEffect(() => {
+    if (searchKeyword) return;
+    if (page === 1) return;
+    fetchFilteredProducts(page, false);
+  }, [page]);
+
+
+  ///////////////////////////////////
+  // useEffect(() => {
+  //   if (searchKeyword) {
+  //     setLoading(true);
+  //     setError(null);
+  //     fetch(`https://be-tm-t.onrender.com/Products/search?q=${encodeURIComponent(searchKeyword)}`)
+  //       .then(res => {
+  //         if (!res.ok) throw new Error('Lỗi khi tìm kiếm sản phẩm');
+  //         return res.json();
+  //       })
+  //       .then(data => {
+  //         setProducts(data);
+  //         setHasMoreProducts(false);
+  //       })
+  //       .catch(err => setError(err.message))
+  //       .finally(() => setLoading(false));
+  //   } else {
+  //     setPage(1);
+  //     fetchFilteredProducts(true);
+  //   }
+  // }, [searchKeyword, category, priceRangeIds]);
+
+  // useEffect(() => {
+  //   if (searchKeyword) return;
+  //   const params = {};
+  //   if (category && category !== 'all') params.category = category;
+  //   if (priceRangeIds && !priceRangeIds.includes('price_all')) {
+  //     params.price = priceRangeIds.join(',');
+  //   } else {
+  //     params.price = 'price_all';
+  //   }
+  //   setSearchParams(params);
+  // }, [category, priceRangeIds, setSearchParams, searchKeyword]);
 
   const updateFilters = (newCategory, newPriceRanges) => {
     setCategory(newCategory);
     setPriceRangeIds(newPriceRanges);
+
+    const params = {};
+    if (newCategory && newCategory !== 'all') params.category = newCategory;
+    if (newPriceRanges && !newPriceRanges.includes('price_all')) {
+      params.price = newPriceRanges.join(',');
+    } else {
+      params.price = 'price_all';
+    }
+
+    setSearchParams(params);
   };  
 
   const sortedProducts = [...products].sort((a, b) => {
@@ -120,31 +205,6 @@ export default function ShopPage() {
     //if (selectedSort === 'rating_desc') return b.rating - a.rating;
     return 0; // 'default'
   });
-
-
-  // useEffect(() => {
-  //   const token = localStorage.getItem('accessToken');
-  //   fetch('/api/Products', {
-  //     method: 'GET',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       ...(token && { 'Authorization': `Bearer ${token}` })
-  //     }
-  //   })
-  //     .then(response => {
-  //       if (!response.ok) throw new Error("Lỗi khi fetch sản phẩm");
-  //       // console.log(response);
-  //       return response.json();
-  //     })
-  //     .then(data => {
-  //       setProducts(data);
-  //       setLoading(false);
-  //     })
-  //     .catch(err => {
-  //       setError(err.message);
-  //       setLoading(false);
-  //     });
-  // }, []);
 
   return (
     // === Khung Chính Của Trang ===
@@ -212,11 +272,12 @@ export default function ShopPage() {
             {products.length > 0 && !loading && (
               <div className="text-center mt-10 pt-6 border-t border-gray-200">
                 <button 
-                    type="button"
-                    className="px-8 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-green active:scale-95"
-                    onClick={(handleLoadMore) => console.log("Xử lý logic Xem Thêm...")}
+                  type="button"
+                  className="px-8 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-opacity-90 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-green active:scale-95"
+                  onClick={handleLoadMore}
+                  disabled={loading || !hasMoreProducts}
                 >
-                    Xem Thêm Sản Phẩm
+                  {loading ? 'Đang tải...' : hasMoreProducts ? 'Xem Thêm Sản Phẩm' : 'Đã tải hết sản phẩm'}
                 </button>
               </div>
               
