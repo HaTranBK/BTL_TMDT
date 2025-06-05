@@ -5,7 +5,6 @@ import SignUpPage from "../pages/SignUpPage.jsx";
 import LoginPage from "../pages/LoginPage.jsx";
 import MyAccount from "../pages/MyAccountPage.jsx"; 
 import Checkout from "../pages/Checkout.jsx";
-import MyAccount from "../pages/MyAccountPage.jsx";
 import ShopPage from "../pages/ShopPage.jsx";
 import ProductDetailPage from "../pages/ProductDetailPage.jsx"; 
 
