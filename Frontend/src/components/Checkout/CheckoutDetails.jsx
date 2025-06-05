@@ -1,6 +1,100 @@
 import React from 'react'
+import { useState, useEffect } from 'react';
 
 const CheckoutDetails = ({ onNext }) => {
+    const [cart, setCart] = useState([]);
+    const [totalCart, setTotalCart] = useState(0);
+    const [loading, setLoading] = useState(true);
+
+    const formatNumber = (num) => {
+        if (typeof num !== "number") num = Number(num);
+        return num.toLocaleString('vi-VN');
+    };
+
+    useEffect(() => {
+        fetchCart();
+    }, []);
+
+    const fetchCart = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            setLoading(true);
+            const response = await fetch(`https://be-tm-t.onrender.com/carts`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            const data = await response.json();
+            setCart(data.data.cart.Products);
+            setTotalCart(data.data.totalCart);
+        } catch (error) {
+            console.error("Error fetching cart:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSubmitOrder = async () => {
+        const token = localStorage.getItem('token');
+        try {
+            setLoading(true);
+            // Bước 1: Lấy dữ liệu giỏ hàng
+            const cartRes = await fetch(`https://be-tm-t.onrender.com/carts`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if (!cartRes.ok) throw new Error('Failed to fetch cart');
+
+            const cartData = await cartRes.json();
+            const productsInCart = cartData.data.cart.Products;
+
+            // Bước 2: Tạo dữ liệu đơn hàng
+            const orderData = {
+                products: productsInCart.map(product => ({
+                    productId: product.id,
+                    quantity: product.quantity,
+                })),
+            };
+
+            // Bước 3: Gửi đơn hàng
+            const orderRes = await fetch(`https://be-tm-t.onrender.com/orders`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(orderData),
+            });
+
+            if (!orderRes.ok) throw new Error('Failed to submit order');
+
+            const result = await orderRes.json();
+            console.log('Order submitted successfully:', result);
+
+            // TODO: navigate to success screen or show confirmation
+        } catch (error) {
+            console.error('Error submitting order:', error.message);
+        } finally {
+            onNext();
+            setLoading(false);
+        }
+    };
+
+    if (loading) return (
+        <div className="flex justify-center items-center h-64">
+            <div role="status">
+                <svg aria-hidden="true" class="inline w-16 h-16 text-gray-200 animate-spin dark:text-gray-600 fill-gray-600 dark:fill-gray-300" viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
+                    <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
+                </svg>
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    );
+
     return (
         <div className="mx-[160px] my-[80px] flex justify-center">
             <div className="bg-white">
@@ -90,61 +184,38 @@ const CheckoutDetails = ({ onNext }) => {
                             </div>
 
                         </div>
-                        <button onClick={onNext} className="bg-black text-white w-full h-[48px] rounded-[8px] py-2">Place Order</button>
+                        <button onClick={() => handleSubmitOrder()} className="bg-black text-white w-full h-[48px] rounded-[8px] py-2">Place Order</button>
                     </div>
                     <div className="p-4 rounded-[6px] border-[1px] border-[#6C7275] w-[413px] h-fit">
                         <h2 className="text-xl font-bold mb-4">Order summary</h2>
-                        <div className="flex items-center my-4 pb-6 relative border-b">
-                            <img src="https://placehold.co/50x50" alt="Tray Table - Black" className="w-12 h-12 mr-4" />
-                            <div className='flex flex-col gap-[6px]'>
-                                <p className='font-bold'>Tray Table</p>
-                                <p className="text-gray-500">Color: Black</p>
-                                <div className='flex items-center'>
-                                    <div className="w-fit rounded-[6px] border-[1px] border-[#6C7275]">
-                                        <button className="px-2 py-1">-</button>
-                                        <span className="px-2">2</span>
-                                        <button className="px-2 py-1">+</button>
+                        {cart.map((item) => (
+                            <div key={item.id} className="flex items-center my-4 pb-6 relative border-b">
+                                <img src={item.image} alt="Tray Table - Black" className="w-12 h-12 mr-4" />
+                                <div className='flex flex-col gap-[6px]'>
+                                    <p
+                                        className="font-bold max-w-[200px] truncate"
+                                        title={item.name}
+                                    >
+                                        {item.name}
+                                    </p>
+                                    {/* <p className="text-gray-500">Color: Black</p> */}
+                                    <div className='flex items-center'>
+                                        <div className="w-fit rounded-[6px] border-[1px] border-[#ababab]">
+                                            <button className="px-2 py-1 cursor-not-allowed">-</button>
+                                            <span className="px-2">{item.quantity}</span>
+                                            <button className="px-2 py-1 cursor-not-allowed">+</button>
+                                        </div>
                                     </div>
                                 </div>
+                                <span className="absolute right-0 top-0 font-bold">{formatNumber(item.price)}</span>
                             </div>
-                            <span className="absolute right-0 top-0 font-bold">$38.00</span>
-                        </div>
-                        <div className="flex items-center my-4 pb-6 relative border-b">
-                            <img src="https://placehold.co/50x50" alt="Tray Table - Red" className="w-12 h-12 mr-4" />
-                            <div className='flex flex-col gap-[6px]'>
-                                <p className='font-bold'>Tray Table</p>
-                                <p className="text-gray-500">Color: Black</p>
-                                <div className='flex items-center'>
-                                    <div className="w-fit rounded-[6px] border-[1px] border-[#6C7275]">
-                                        <button className="px-2 py-1">-</button>
-                                        <span className="px-2">2</span>
-                                        <button className="px-2 py-1">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <span className="absolute right-0 top-0 font-bold">$38.00</span>
-                        </div>
-                        <div className="flex items-center my-4 pb-6 relative border-b">
-                            <img src="https://placehold.co/50x50" alt="Table Lamp - Gold" className="w-12 h-12 mr-4" />
-                            <div className='flex flex-col gap-[6px]'>
-                                <p className='font-bold'>Table Lamp</p>
-                                <p className="text-gray-500">Color: Gold</p>
-                                <div className='flex items-center'>
-                                    <div className="w-fit rounded-[6px] border-[1px] border-[#6C7275]">
-                                        <button className="px-2 py-1">-</button>
-                                        <span className="px-2">1</span>
-                                        <button className="px-2 py-1">+</button>
-                                    </div>
-                                </div>
-                            </div>
-                            <span className="absolute right-0 top-0 font-bold">$38.00</span>
-                        </div>
-                        <div className="my-6 flex gap-[16px]">
+                        ))}
+                        < div className="my-6 flex gap-[16px]" >
                             <input type="text" placeholder="Input" className="border rounded-[6px] p-2 flex-1 h-[52px]" />
                             <button className="bg-black text-white w-[135px] h-[52px] rounded-[8px] py-2">Apply</button>
                         </div>
                         <div className="mb-4">
-                            <p className="text-green-500">JankataWIN -$25.00 <button className="text-red-500">(Remove)</button></p>
+                            <p className="text-green-500">JankataWIN -25.000 <button className="text-red-500">(Remove)</button></p>
                         </div>
                         <div className="border-t mt-2 pt-2">
                             <div className="flex justify-between pb-3 border-b">
@@ -153,17 +224,17 @@ const CheckoutDetails = ({ onNext }) => {
                             </div>
                             <div className="flex justify-between mt-2 pb-3 border-b">
                                 <span>Subtotal</span>
-                                <span>$99.00</span>
+                                <span>{formatNumber(totalCart)}VND</span>
                             </div>
                             <div className="flex justify-between mt-2 pb-3 border-b font-bold">
                                 <span>Total</span>
-                                <span>$234.00</span>
+                                <span>{formatNumber(totalCart)}VND</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     )
 }
 
