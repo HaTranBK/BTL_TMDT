@@ -29,16 +29,17 @@ const OrderComplete = () => {
 
     const fetchCart = async () => {
         const token = localStorage.getItem('token');
+        const orderId = localStorage.getItem('latestOrderId');
         try {
-            const response = await fetch(`https://be-tm-t.onrender.com/carts`, {
+            const response = await fetch(`https://be-tm-t.onrender.com/Orders/${orderId}`, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "application/json"
                 }
             });
             const data = await response.json();
-            setCart(data.data.cart.Products);
-            setTotalCart(data.data.totalCart);
+            setCart(data.data.Products);
+            setTotalCart(data.data.total_price);
         } catch (error) {
             console.error("Error fetching cart:", error);
         } finally {
@@ -102,7 +103,7 @@ const OrderComplete = () => {
                             {cart.map((item) => (
                                 <div key={item.id} className="relative">
                                     <img src={item.image} alt="Black side table" className="w-24 h-24 object-cover rounded-md" />
-                                    <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">{item.quantity}</span>
+                                    <span className="absolute -top-2 -right-2 bg-black text-white text-xs w-6 h-6 rounded-full flex items-center justify-center">{item.OrderProduct.quantity}</span>
                                 </div>
                             ))}
                         </div>

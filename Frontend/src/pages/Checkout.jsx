@@ -5,7 +5,7 @@ import CheckoutDetails from '../components/Checkout/CheckoutDetails';
 import OrderComplete from '../components/Checkout/OrderComplete';
 
 const Checkout = () => {
-    // localStorage.setItem('token', '');
+    localStorage.setItem('token', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjksInJvbGUiOiJjdXN0b21lciIsImlhdCI6MTc0OTEzMTQ3MywiZXhwIjoxNzQ5MjE3ODczfQ.p9bY1-Ag0G2HTDuKZuv8ObZ-4_Z5XMU1cVE-ultaVNA');
 
     const [step, setStep] = useState('shopping-cart');
 

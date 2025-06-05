@@ -73,11 +73,26 @@ const CheckoutDetails = ({ onNext }) => {
 
             const result = await orderRes.json();
             console.log('Order submitted successfully:', result);
+            localStorage.setItem('latestOrderId', result.data.order.id);
+            // console.log('Order ID:', result.data.order.id);
 
-            // TODO: navigate to success screen or show confirmation
+            // Bước 4: Xoá từng sản phẩm trong giỏ hàng
+            await Promise.all(
+                productsInCart.map(product =>
+                    fetch(`https://be-tm-t.onrender.com/carts/${product.id}`, {
+                        method: 'DELETE',
+                        headers: {
+                            Authorization: `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        }
+                    })
+                )
+            );
+
         } catch (error) {
             console.error('Error submitting order:', error.message);
         } finally {
+            // TODO: navigate to success screen
             onNext();
             setLoading(false);
         }
