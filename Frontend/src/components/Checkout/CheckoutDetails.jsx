@@ -34,6 +34,39 @@ const CheckoutDetails = ({ onNext }) => {
             setLoading(false);
         }
     };
+    const handleRemoveVoucher = () => {
+        setVoucherCode('');
+        setDiscount(null);
+        setValidCode('');
+    }
+    const handleApplyVoucher = async () => {
+        if (!voucherCode.trim()) {
+            setError('Please enter a voucher code');
+            setDiscount(null);
+            return;
+        }
+
+        const token = localStorage.getItem('token');
+        try {
+            const response = await fetch(`https://be-tm-t.onrender.com/vouchers?code=${voucherCode}`, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+            if (!response.ok) throw new Error('Invalid voucher');
+
+            const data = await response.json();
+            setDiscount(data.data.discount);
+            setValidCode(data.data.code);
+            setVoucherCode('');
+            setError('');
+        } catch (err) {
+            setDiscount(null);
+            setError('Voucher not found or invalid');
+
+        }
+    };
 
     const handleSubmitOrder = async () => {
         const token = localStorage.getItem('token');
@@ -57,6 +90,9 @@ const CheckoutDetails = ({ onNext }) => {
                     productId: product.id,
                     quantity: product.quantity,
                 })),
+                voucherCodes: [
+                    validCode
+                ]
             };
 
             // Bước 3: Gửi đơn hàng
@@ -226,12 +262,33 @@ const CheckoutDetails = ({ onNext }) => {
                             </div>
                         ))}
                         < div className="my-6 flex gap-[16px]" >
-                            <input type="text" placeholder="Input" className="border rounded-[6px] p-2 flex-1 h-[52px]" />
-                            <button className="bg-black text-white w-[135px] h-[52px] rounded-[8px] py-2">Apply</button>
+                            <input
+                                type="text"
+                                placeholder="Enter voucher code"
+                                className="border rounded-[6px] p-2 flex-1 h-[52px]"
+                                value={voucherCode}
+                                onChange={(e) => setVoucherCode(e.target.value)}
+                            />
+                            <button onClick={handleApplyVoucher} className="bg-black text-white w-[135px] h-[52px] rounded-[8px] py-2">Apply</button>
                         </div>
-                        <div className="mb-4">
+                        {discount && (
+                            <div className="mb-4">
+                                <p>
+                                    <span className="text-green-500">{validCode}</span> -{formatNumber(discount)}VND
+                                    <button onClick={handleRemoveVoucher} className="text-red-500 ml-2">(Remove)</button>
+                                </p>
+                            </div>
+                        )}
+                        {error && (
+                            <div className="mb-4">
+                                <p className="text-red-500 font-medium">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
+                        {/* <div className="mb-4">
                             <p className="text-green-500">JankataWIN -25.000 <button className="text-red-500">(Remove)</button></p>
-                        </div>
+                        </div> */}
                         <div className="border-t mt-2 pt-2">
                             <div className="flex justify-between pb-3 border-b">
                                 <span>Shipping</span>
@@ -241,9 +298,13 @@ const CheckoutDetails = ({ onNext }) => {
                                 <span>Subtotal</span>
                                 <span>{formatNumber(totalCart)}VND</span>
                             </div>
+                            <div className="flex justify-between mt-2 pb-3 border-b">
+                                <span>Discount</span>
+                                <span>-{formatNumber(discount)}VND</span>
+                            </div>
                             <div className="flex justify-between mt-2 pb-3 border-b font-bold">
                                 <span>Total</span>
-                                <span>{formatNumber(totalCart)}VND</span>
+                                <span>{formatNumber(totalCart - discount)}VND</span>
                             </div>
                         </div>
                     </div>
