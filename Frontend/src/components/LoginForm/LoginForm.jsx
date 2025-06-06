@@ -1,121 +1,56 @@
-import React, { useState } from "react";
-import { EyeOff } from "lucide-react";
-import * as yup from "yup";
-import { useFormik } from "formik";
-import toast from "react-hot-toast";
-import { useNavigate } from "react-router-dom";
-const LoginForm = () => {
-  const [showPassword, setShowPassword] = useState(false);
-  const [checked, setChecked] = useState(false);
-  const handleChecked = (e) => {
-    const { checked } = e.target;
-    setChecked(checked);
-  };
-  const navigate = useNavigate();
-  const { values, errors, handleChange, handleBlur, handleSubmit, touched } =
-    useFormik({
-      initialValues: {
-        username: "",
-        password: "",
-      },
-      onSubmit: async (values) => {
-        console.log("values in useformik: ", values);
-        toast.success("Login Successfully!");
-        setTimeout(() => {
-          navigate("/");
-        }, 2000);
-        // setIsSigningInOn();
-        // try {
-        //   const result = await axiosInstance.post("/auth/login", values);
-        //   console.log("result in signIn useformik: ", result);
-        //   handleNotification(result.data.message, "success");
-        //   setAuthUser(result.data.user);
-        //   connectSocket();
-        //   setTimeout(() => {
-        //     navigate("/");
-        //   }, 2000);
-        // } catch (error) {
-        //   console.log("error in signin in useformik: ", error);
-        //   handleNotification(error.response.data.message, "error");
-        // } finally {
-        //   setIsSigningInOff();
-        // }
-      },
-      validationSchema: yup.object({
-        username: yup.string().required("Username is required"),
+import React, { useState } from 'react';
 
-        password: yup
-          .string()
-          .required("Password is required!")
-          .min(6, "Password must be at least 6 characters"),
-      }),
-    });
-  console.log("error: ", errors);
+const LoginForm = ({ onSubmit, loading }) => {
+  const [formData, setFormData] = useState({
+    email: '',
+    password: ''
+  });
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSubmit(formData);
+  };
+
   return (
-    <form
-      className="flex flex-col w-full max-w-md gap-6 p-5"
-      onSubmit={handleSubmit}
-    >
-      <div>
+    <form onSubmit={handleSubmit} className="w-full max-w-md">
+      <div className="mb-4">
+        <label htmlFor="email" className="block text-gray-700 mb-2">Email</label>
         <input
           type="text"
-          name="username"
-          placeholder="Username"
-          value={values.username}
+          id="email"
+          name="email"
+          value={formData.email}
           onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full p-2 border rounded"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          required
         />
-        {errors.username && touched.username && (
-          <p className="text-red-500">{errors.username}</p>
-        )}
       </div>
-
-      <div className="relative">
+      <div className="mb-6">
+        <label htmlFor="password" className="block text-gray-700 mb-2">Password</label>
         <input
-          type={showPassword ? "text" : "password"}
+          type="password"
+          id="password"
           name="password"
-          placeholder="Password"
-          value={values.password}
+          value={formData.password}
           onChange={handleChange}
-          onBlur={handleBlur}
-          className="w-full p-2 border rounded"
-          autoComplete="new-password"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md"
+          required
         />
-        {errors.password && touched.password && (
-          <p className="text-red-500">{errors.password}</p>
-        )}
-        <button
-          type="button"
-          className="absolute right-2 top-2"
-          onClick={() => setShowPassword(!showPassword)}
-        >
-          {!showPassword ? (
-            <img
-              src="https://dashboard.codeparrot.ai/api/image/Z94kacNZNkcbc4oy/huge-ico.png"
-              alt="toggle password"
-              className="w-6 h-6"
-            />
-          ) : (
-            <EyeOff />
-          )}
-        </button>
       </div>
-
       <button
-        className={`w-full max-w-md px-4 py-2 mt-4 text-white  rounded ${
-          Object.keys(errors).length > 0 ||
-          Object.values(values).some((value) => !value)
-            ? "bg-gray-300"
-            : "bg-green-600 hover:bg-green-500"
-        }`}
         type="submit"
-        disabled={
-          Object.keys(errors).length > 0 ||
-          Object.values(values).some((value) => !value)
-        }
+        disabled={loading}
+        className={`w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
       >
-        Sign In
+        {loading ? 'Signing In...' : 'Sign In'}
       </button>
     </form>
   );

@@ -1,34 +1,115 @@
-import React, { useState } from 'react';
-import Header from '../components/Header';
-import Menu from '../components/OrderTable/Menu';
-import Tabs from '../components/OrderTable/Tabs';
-import Footer from '../components/Footer';
-import OrderTableDetails from '../components/OrderTable/OrderTableDetails';
+import React, { useState, useEffect } from "react";
+import Header from "../components/Header";
+import Menu from "../components/OrderTable/Menu";
+import Tabs from "../components/OrderTable/Tabs";
+import Footer from "../components/Footer";
+import OrderTableDetails from "../components/OrderTable/OrderTableDetails";
 
 export default function AccountPage() {
-  const [activeTab, setActiveTab] = useState('Tất cả');
+  const [activeTab, setActiveTab] = useState("Tất cả");
   const [selectedOrder, setSelectedOrder] = useState(null);
+  const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [updateLoading, setUpdateLoading] = useState(false);
 
-  const orders = [
-    {
-      id: '#3456_768',
-      date: '17/4/2025 10:20 am',
-      status: 'Hoàn thành',
-      price: '248.000 VND',
-      items: [
-        { name: 'Bình giữ nhiệt', quantity: 1, color: 'Xanh lá', price: '200.000' },
-        { name: 'Túi vải', quantity: 2 , price: '200.000' },
-      ],
-    },
-    {
-      id: '#3456_980',
-      date: '17/4/2025 10:20 am',
-      status: 'Chờ thanh toán',
-      price: '248.000 VND',
-      items: [{ name: 'Ống hút inox', quantity: 3 }],
-    },
-    // thêm đơn hàng khác nếu muốn
-  ];
+  const fetchOrders = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch(
+        "https://be-tm-t.onrender.com/Orders/my-orders",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: "application/json",
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        const transformedOrders = data.data.map((order) => ({
+          id: `#${order.id}`,
+          orderId: order.id,
+          date: new Date(order.date).toLocaleString("vi-VN"),
+          status:
+            order.status === "cancelled"
+              ? "Đã hủy"
+              : order.status === "completed"
+              ? "Hoàn thành"
+              : order.status === "pending"
+              ? "Chờ thanh toán"
+              : order.status,
+          originalStatus: order.status,
+          price: `${order.total_price.toLocaleString("vi-VN")} VND`,
+          items: order.Products.map((product) => ({
+            name: product.name,
+            quantity: product.OrderProduct.quantity,
+            price: `${product.OrderProduct.price.toLocaleString("vi-VN")} VND`,
+          })),
+        }));
+        setOrders(transformedOrders);
+      } else {
+        throw new Error(data.message || "Failed to fetch orders");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateOrderStatus = async (orderId, newStatus) => {
+    try {
+      setUpdateLoading(true);
+      const token  = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch(
+        `https://be-tm-t.onrender.com/Orders/${orderId}/status`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            status: newStatus,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (data.success) {
+        await fetchOrders();
+      } else {
+        throw new Error(data.message || "Failed to update order status");
+      }
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  const handleCancelOrder = async (order) => {
+    if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
+      await updateOrderStatus(order.orderId, "cancelled");
+    }
+  };
+
+  useEffect(() => {
+    fetchOrders();
+  }, []);
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -40,13 +121,21 @@ export default function AccountPage() {
             <Menu />
             <div className="flex-1">
               <Tabs active={activeTab} onChange={setActiveTab} />
-              <OrderTableDetails
-                orders={orders}   // Truyền orders trực tiếp
-                filter={activeTab} // Truyền activeTab để lọc
-                selectedOrder={selectedOrder}
-                onSelectOrder={setSelectedOrder}
-                onBack={() => setSelectedOrder(null)}
-              />
+              {loading ? (
+                <div className="text-center py-4">Đang tải...</div>
+              ) : error ? (
+                <div className="text-red-500 text-center py-4">{error}</div>
+              ) : (
+                <OrderTableDetails
+                  orders={orders}
+                  filter={activeTab}
+                  selectedOrder={selectedOrder}
+                  onSelectOrder={setSelectedOrder}
+                  onBack={() => setSelectedOrder(null)}
+                  onCancelOrder={handleCancelOrder}
+                  updateLoading={updateLoading}
+                />
+              )}
             </div>
           </div>
         </div>

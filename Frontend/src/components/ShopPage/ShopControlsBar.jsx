@@ -5,15 +5,16 @@ const sortOptions = [
   { id: 'default', name: 'Mặc định' },
   { id: 'price_asc', name: 'Giá: Tăng dần' },
   { id: 'price_desc', name: 'Giá: Giảm dần' },
-  { id: 'newest', name: 'Mới nhất' },
-  { id: 'rating_desc', name: 'Đánh giá: Cao nhất' },
+  // { id: 'newest', name: 'Mới nhất' },
+  // { id: 'rating_desc', name: 'Đánh giá: Cao nhất' },
 ];
 
 export default function ShopControlsBar({
   totalProducts = 0,
+  selectedSort,
+  setSelectedSort,
 
 }) {
-  const [selectedSort, setSelectedSort] = useState(sortOptions[0].id);
   const [currentView, setCurrentView] = useState('grid'); // 'grid' hoặc 'list'
   const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
 

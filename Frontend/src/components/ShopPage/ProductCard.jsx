@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StarIcon, ShoppingCartIcon, HeartIcon, SearchIcon } from 'lucide-react';
 
 const formatCurrency = (amount) => {
@@ -7,6 +8,7 @@ const formatCurrency = (amount) => {
 
 export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
+  const navigate = useNavigate();
 
   let discountPercentage = product.discount;
   if (!discountPercentage && product.originalPrice && product.price && product.originalPrice > product.price) {
@@ -14,14 +16,51 @@ export default function ProductCard({ product }) {
     discountPercentage = Math.round((diff / product.originalPrice) * 100) + '%';
   }
 
+  const handleCardClick = () => {
+    navigate(`/product/${product.id}`); // Chuyển hướng đến trang chi tiết sản phẩm
+    console.log(`Navigating to product detail for ${product.name}`);
+  };
+
   const handleActionClick = (e, actionMessage) => {
     e.stopPropagation();
     console.log(`${actionMessage} for ${product.name}`);
   };
 
+  const handleAddToCart = async (e, productId) => {
+    e.stopPropagation();
+    const token = localStorage.getItem('token');
+
+    if (!token) {
+      console.error('No access token found. Please log in first.');
+      navigate('/login'); // Chuyển hướng đến trang đăng nhập
+      return;
+    }
+    try {
+      const response = await fetch(`/api/carts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          productId: productId,
+          quantity: 1, 
+        }),
+      });
+
+      const result = await response.json();
+      // Giả lập thêm sản phẩm vào giỏ hàng
+      console.log(`Adding product ${productId} to cart`);
+      // Thực hiện logic thêm vào giỏ hàng ở đây
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+    }
+  }
+
   return (
     // === Card Container ===
     <div
+      onClick={handleCardClick}
       className="bg-white rounded-xl shadow-lg overflow-hidden transition-all duration-300 ease-in-out hover:shadow-2xl transform hover:-translate-y-1 group"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -62,14 +101,14 @@ export default function ProductCard({ product }) {
             <HeartIcon className="w-5 h-5" />
           </button>
           <button
-            onClick={(e) => handleActionClick(e, "Added to cart")}
+            onClick={(e) => handleAddToCart(e, product.id)}
             className="p-3 bg-primary-green text-white rounded-full shadow-xl hover:bg-opacity-90 transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-primary-green"
             aria-label="Thêm vào giỏ hàng"
           >
             <ShoppingCartIcon className="w-6 h-6" />
           </button>
           <button
-            onClick={(e) => handleActionClick(e, "Quick view")}
+            onClick={(e) => handleActionClick(e, "Looking for quick view")}
             className="p-2.5 bg-white text-gray-700 rounded-full shadow-lg hover:bg-blue-500 hover:text-white transition-all duration-200 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-400"
             aria-label="Xem nhanh"
           >

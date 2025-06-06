@@ -1,32 +1,31 @@
 import React, { useState } from 'react';
-import { StarIcon, ThumbsUpIcon, MessageSquareIcon, ChevronDownIcon } from 'lucide-react';
+import { StarIcon, ThumbsUpIcon, MessageSquareIcon } from 'lucide-react';
 
-// Component con cho một mục đánh giá
 const ReviewItem = ({ review }) => {
   return (
-    <div className="py-5 border-b border-gray-200 last:border-b-0"> 
+    <div className="py-5 border-b border-gray-200 last:border-b-0">
       <div className="flex items-start space-x-3 sm:space-x-4">
-        <img 
+        <img
           src={review.avatar || '/images/avatars/default-avatar.png'}
-          alt={`Avatar của ${review.author}`} 
-          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover" 
+          alt={`Avatar của ${review.author}`}
+          className="w-8 h-8 sm:w-10 sm:h-10 rounded-full object-cover"
         />
         <div className="flex-1">
           <div className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
             <div>
-              <h4 className="text-xs sm:text-sm font-semibold text-gray-800">{review.author}</h4>
+              <h4 className="text-xs sm:text-sm font-semibold text-gray-800">{review.author || "Người dùng ẩn danh"}</h4>
               <div className="flex items-center mt-0.5">
                 {[...Array(5)].map((_, i) => (
                   <StarIcon
                     key={i}
-                    className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`} 
+                    className={`w-3 h-3 sm:w-3.5 sm:h-3.5 ${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-300'}`}
                   />
                 ))}
               </div>
             </div>
-            <p className="text-xs text-gray-400 mt-1 sm:mt-0">{review.date}</p>
+            <p className="text-xs text-gray-400 mt-1 sm:mt-0">{review.date || "Không rõ ngày"}</p>
           </div>
-          <p className="mt-2 text-sm text-gray-600 leading-relaxed">{review.text}</p>
+          <p className="mt-2 text-sm text-gray-600 leading-relaxed whitespace-pre-wrap">{review.text || "Không có nội dung đánh giá."}</p>
           <div className="mt-2.5 flex items-center space-x-3 text-xs">
             <button className="flex items-center text-gray-500 hover:text-gray-700 transition-colors">
               <ThumbsUpIcon className="w-3.5 h-3.5 mr-1" />
@@ -43,76 +42,55 @@ const ReviewItem = ({ review }) => {
   );
 };
 
+const starFilterOptions = [
+  { id: 'all', name: 'Tất cả' },
+  { id: 5, name: '5 Sao' },
+  { id: 4, name: '4 Sao' },
+  { id: 3, name: '3 Sao' },
+  { id: 2, name: '2 Sao' },
+  { id: 1, name: '1 Sao' },
+];
 
-export default function ProductReviews({ reviews = [], productId }) {
-  const [visibleReviews, setVisibleReviews] = useState(3);
-  const [sortOrder, setSortOrder] = useState('newest');
-  const [isSortDropdownOpen, setIsSortDropdownOpen] = useState(false);
+export default function ProductReviews({ reviews = [], selectedStar, onStarFilterChange }) {
+  const [visibleReviews, setVisibleReviews] = useState(5);
 
-  const reviewSortOptions = [ /* ... giữ nguyên ... */ ];
-
-  const handleLoadMore = () => setVisibleReviews(prev => prev + 3);
-  
-  const sortedReviews = [...reviews]; 
+  const handleLoadMore = () => setVisibleReviews(prev => prev + 5);
 
   return (
     <div className="w-full">
-      {/* Thanh điều khiển của phần Reviews */}
       <div className="flex flex-col sm:flex-row items-center justify-between mb-5 sm:mb-6">
-        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-2 sm:mb-0">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 sm:mb-0">
           {reviews.length > 0 ? `${reviews.length} Đánh Giá` : 'Chưa có đánh giá'}
         </h3>
-        {reviews.length > 0 && ( // Chỉ hiển thị dropdown sắp xếp nếu có review
-            <div className="relative">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-sm font-medium mr-2">Lọc theo:</span>
+          {starFilterOptions.map(option => (
             <button
-                onClick={() => setIsSortDropdownOpen(!isSortDropdownOpen)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-1 focus:ring-gray-400"
-                aria-haspopup="true"
-                aria-expanded={isSortDropdownOpen}
+              key={option.id}
+              onClick={() => onStarFilterChange(option.id)}
+              className={`px-3 py-1.5 text-xs sm:text-sm font-medium rounded-full border transition-colors
+                          ${selectedStar === option.id 
+                            ? 'bg-gray-800 text-white border-gray-800' 
+                            : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-100'
+                          }`}
             >
-                Sắp xếp: {reviewSortOptions.find(opt => opt.id === sortOrder)?.name || 'Mới nhất'}
-                <ChevronDownIcon className={`w-3 h-3 sm:w-3.5 sm:h-3.5 text-gray-500 transition-transform duration-200 ${isSortDropdownOpen ? 'transform rotate-180' : ''}`} />
+              {option.name}
             </button>
-            {isSortDropdownOpen && (
-                <div 
-                    className="absolute right-0 mt-1 w-44 sm:w-48 bg-white border border-gray-200 rounded-md shadow-lg z-20 py-1 origin-top-right"
-                    role="menu" 
-                    aria-orientation="vertical"
-                    onMouseLeave={() => setIsSortDropdownOpen(false)}
-                >
-                {reviewSortOptions.map(option => (
-                    <button
-                    key={option.id}
-                    onClick={() => { /* ... */ }}
-                    className={`block w-full text-left px-3 py-1.5 text-xs sm:text-sm 
-                                ${sortOrder === option.id 
-                                    ? 'bg-gray-100 text-gray-900 font-medium' 
-                                    : 'text-gray-600 hover:bg-gray-50 hover:text-gray-800'
-                                }`}
-                    role="menuitem"
-                    >
-                    {option.name}
-                    </button>
-                ))}
-                </div>
-            )}
-            </div>
-        )}
+          ))}
+        </div>
       </div>
 
-      {/* Danh sách các đánh giá */}
-      {sortedReviews.length > 0 ? (
-        <div className="space-y-0"> 
-          {sortedReviews.slice(0, visibleReviews).map(review => (
+      {reviews.length > 0 ? (
+        <div className="space-y-0">
+          {reviews.slice(0, visibleReviews).map(review => (
             <ReviewItem key={review.id} review={review} />
           ))}
         </div>
       ) : (
-        <p className="text-sm text-gray-500 py-4 text-center">Hãy là người đầu tiên đánh giá sản phẩm này!</p>
+        <p className="text-sm text-gray-500 py-4 text-center">Không có đánh giá nào phù hợp với bộ lọc này.</p>
       )}
 
-      {/* Nút Tải thêm đánh giá */}
-      {visibleReviews < sortedReviews.length && (
+      {visibleReviews < reviews.length && (
         <div className="mt-6 sm:mt-8 text-center">
           <button
             onClick={handleLoadMore}

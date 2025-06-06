@@ -6,6 +6,26 @@ const CheckoutDetails = ({ onNext }) => {
     const [totalCart, setTotalCart] = useState(0);
     const [loading, setLoading] = useState(true);
 
+    const [voucherCode, setVoucherCode] = useState('');
+    const [validCode, setValidCode] = useState('');
+    const [discount, setDiscount] = useState(null);
+    const [error, setError] = useState('');
+
+    const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    phone: '',
+    email: '',
+    streetAddress: '',
+    city: '',
+    state: '',
+    zipCode: '',
+    paymentMethod: '', // "card" hoặc "paypal"
+    cardNumber: '',
+    expiryDate: '',
+    cvc: '',
+    });
+
     const formatNumber = (num) => {
         if (typeof num !== "number") num = Number(num);
         return num.toLocaleString('vi-VN');
@@ -68,7 +88,41 @@ const CheckoutDetails = ({ onNext }) => {
         }
     };
 
+    const [formErrors, setFormErrors] = useState({});
+
+  // Hàm cập nhật formData khi user nhập
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  // Hàm validate form đơn giản
+  const validate = () => {
+    const errors = {};
+    if (!formData.firstName.trim()) errors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
+    if (!formData.phone.trim()) errors.phone = 'Phone number is required';
+    if (!formData.email.trim()) errors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email)) errors.email = 'Email is invalid';
+
+    if (!formData.streetAddress.trim()) errors.streetAddress = 'Street address is required';
+    if (!formData.city.trim()) errors.city = 'City is required';
+    if (!formData.state.trim()) errors.state = 'State is required';
+    if (!formData.zipCode.trim()) errors.zipCode = 'Zip code is required';
+
+    if (!formData.paymentMethod) errors.paymentMethod = 'Please select a payment method';
+    if (formData.paymentMethod === 'card') {
+      if (!formData.cardNumber.trim()) errors.cardNumber = 'Card number is required';
+      if (!formData.expiryDate.trim()) errors.expiryDate = 'Expiry date is required';
+      if (!formData.cvc.trim()) errors.cvc = 'CVC code is required';
+    }
+
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
     const handleSubmitOrder = async () => {
+        if (!validate()) return;
         const token = localStorage.getItem('token');
         try {
             setLoading(true);
@@ -182,7 +236,8 @@ const CheckoutDetails = ({ onNext }) => {
                 <div className="flex gap-[64px] mt-[80px]">
                     <div>
                         <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
-                            <h2 className="text-xl font-bold mb-4 mt-[8px]">Contact Information</h2>
+                            {/* Contact Information */}
+                            {/* <h2 className="text-xl font-bold mb-4 mt-[8px]">Contact Information</h2>
                             <div className="mb-4">
                                 <input type="text" placeholder="First name" className="border rounded-[6px] p-2 w-full mb-2" />
                                 <input type="text" placeholder="Last name" className="border rounded-[6px] p-2 w-full" />
@@ -193,30 +248,162 @@ const CheckoutDetails = ({ onNext }) => {
                             <div className="mb-4">
                                 <input type="email" placeholder="Your Email" className="border rounded-[6px] p-2 w-full" />
                             </div>
+                            </div>
+                            <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
+                                <h2 className="text-xl font-bold mb-4 mt-[8px]">Shipping Address</h2>
+                                <div className="mb-4">
+                                    <input type="text" placeholder="Street Address" className="border rounded-[6px] p-2 w-full" />
+                                </div>
+                                <div className="mb-4">
+                                    <select className="border rounded-[6px] p-2 w-full">
+                                        <option>Vietnam</option>
+                                    </select>
+                                </div>
+                                <div className="mb-4">
+                                    <input type="text" placeholder="Town / City" className="border rounded-[6px] p-2 w-full" />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 mb-4">
+                                    <input type="text" placeholder="State" className="border rounded-[6px] p-2 w-full" />
+                                    <input type="text" placeholder="Zip Code" className="border rounded-[6px] p-2 w-full" />
+                                </div>
+                                <div className="mb-4">
+                                    <input type="checkbox" id="billing-address" className="mr-2" />
+                                    <label htmlFor="billing-address">Use a different billing address (optional)</label>
+                                </div>
+                            </div>
+                            */}
+
+                        <h2 className="text-xl font-bold mb-4 mt-[8px]">Contact Information</h2>
+                        <div className="mb-4">
+                            <input
+                            type="text"
+                            placeholder="First name"
+                            name="firstName"
+                            className="border rounded-[6px] p-2 w-full mb-2"
+                            value={formData.firstName}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.firstName && <p className="text-red-500 text-sm">{formErrors.firstName}</p>}
+                            <input
+                            type="text"
+                            placeholder="Last name"
+                            name="lastName"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.lastName}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.lastName && <p className="text-red-500 text-sm">{formErrors.lastName}</p>}
+                        </div>
+                        <div className="mb-4">
+                            <input
+                            type="text"
+                            placeholder="Phone number"
+                            name="phone"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.phone}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.phone && <p className="text-red-500 text-sm">{formErrors.phone}</p>}
+                        </div>
+                        <div className="mb-4">
+                            <input
+                            type="email"
+                            placeholder="Your Email"
+                            name="email"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.email}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.email && <p className="text-red-500 text-sm">{formErrors.email}</p>}
+                        </div>
                         </div>
                         <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
-                            <h2 className="text-xl font-bold mb-4 mt-[8px]">Shipping Address</h2>
-                            <div className="mb-4">
-                                <input type="text" placeholder="Street Address" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-                            <div className="mb-4">
-                                <select className="border rounded-[6px] p-2 w-full">
-                                    <option>Vietnam</option>
-                                </select>
-                            </div>
-                            <div className="mb-4">
-                                <input type="text" placeholder="Town / City" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <input type="text" placeholder="State" className="border rounded-[6px] p-2 w-full" />
-                                <input type="text" placeholder="Zip Code" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-                            <div className="mb-4">
-                                <input type="checkbox" id="billing-address" className="mr-2" />
-                                <label htmlFor="billing-address">Use a different billing address (optional)</label>
-                            </div>
+                        <h2 className="text-xl font-bold mb-4 mt-[8px]">Shipping Address</h2>
+                        <div className="mb-4">
+                            <input
+                            type="text"
+                            placeholder="Street Address"
+                            name="streetAddress"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.streetAddress}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.streetAddress && <p className="text-red-500 text-sm">{formErrors.streetAddress}</p>}
+                        </div>
+                        <div className="mb-4">
+                            <select
+                            className="border rounded-[6px] p-2 w-full"
+                            name="country"
+                            value="Vietnam"
+                            disabled
+                            >
+                            <option>Vietnam</option>
+                            </select>
+                        </div>
+                        <div className="mb-4">
+                            <input
+                            type="text"
+                            placeholder="Town / City"
+                            name="city"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.city}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.city && <p className="text-red-500 text-sm">{formErrors.city}</p>}
+                        </div>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <input
+                            type="text"
+                            placeholder="State"
+                            name="state"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.state}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.state && <p className="text-red-500 text-sm">{formErrors.state}</p>}
+                            <input
+                            type="text"
+                            placeholder="Zip Code"
+                            name="zipCode"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.zipCode}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.zipCode && <p className="text-red-500 text-sm">{formErrors.zipCode}</p>}
+                        </div>
+                        <div className="mb-4">
+                            <input type="checkbox" id="billing-address" className="mr-2" />
+                            <label htmlFor="billing-address">Use a different billing address (optional)</label>
+                        </div>
                         </div>
                         <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
+                        <h2 className="text-xl font-bold mb-4 mt-[8px]">Payment method</h2>
+                        <div className="mb-4">
+                            <input
+                            type="radio"
+                            id="card"
+                            name="paymentMethod"
+                            className="mr-2"
+                            value="card"
+                            checked={formData.paymentMethod === 'card'}
+                            onChange={handleInputChange}
+                            />
+                            <label htmlFor="card">Pay by Card Credit</label>
+                        </div>
+                        <div className="mb-4">
+                            <input
+                            type="radio"
+                            id="paypal"
+                            name="paymentMethod"
+                            className="mr-2"
+                            value="paypal"
+                            checked={formData.paymentMethod === 'paypal'}
+                            onChange={handleInputChange}
+                            />
+                            <label htmlFor="paypal">Paypal</label>
+                        </div>
+
+                        {/* <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
                             <h2 className="text-xl font-bold mb-4 mt-[8px]">Payment method</h2>
                             <div className="mb-4">
                                 <input type="radio" id="card" name="payment" className="mr-2" />
@@ -234,9 +421,52 @@ const CheckoutDetails = ({ onNext }) => {
                                 <input type="text" placeholder="CVC code" className="border rounded-[6px] p-2 w-full" />
                             </div>
 
+                        </div> */}
+
+                    {formErrors.paymentMethod && <p className="text-red-500 text-sm">{formErrors.paymentMethod}</p>}
+                    {formData.paymentMethod === 'card' && (
+                        <>
+                        <div className="mb-4">
+                            <input
+                            type="text"
+                            placeholder="Card Number"
+                            name="cardNumber"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.cardNumber}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.cardNumber && <p className="text-red-500 text-sm">{formErrors.cardNumber}</p>}
                         </div>
+                        <div className="grid grid-cols-2 gap-4 mb-4">
+                            <input
+                            type="text"
+                            placeholder="Expiry Date"
+                            name="expiryDate"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.expiryDate}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.expiryDate && <p className="text-red-500 text-sm">{formErrors.expiryDate}</p>}
+                            <input
+                            type="text"
+                            placeholder="CVC"
+                            name="cvc"
+                            className="border rounded-[6px] p-2 w-full"
+                            value={formData.cvc}
+                            onChange={handleInputChange}
+                            />
+                            {formErrors.cvc && <p className="text-red-500 text-sm">{formErrors.cvc}</p>}
+                        </div>
+                        </>
+                    )}
+                    </div>
+
+                    {/* --------------------- */}
+
                         <button onClick={() => handleSubmitOrder()} className="bg-black text-white w-full h-[48px] rounded-[8px] py-2">Place Order</button>
                     </div>
+
+                    {/* Order Summary */}
                     <div className="p-4 rounded-[6px] border-[1px] border-[#6C7275] w-[413px] h-fit">
                         <h2 className="text-xl font-bold mb-4">Order summary</h2>
                         {cart.map((item) => (
