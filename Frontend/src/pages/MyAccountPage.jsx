@@ -67,7 +67,7 @@ export default function AccountPage() {
   const updateOrderStatus = async (orderId, newStatus) => {
     try {
       setUpdateLoading(true);
-      const token = localStorage.getItem("token");
+      const token  = localStorage.getItem("token");
       if (!token) {
         throw new Error("No authentication token found");
       }

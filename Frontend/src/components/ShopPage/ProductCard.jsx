@@ -55,11 +55,6 @@ export default function ProductCard({ product }) {
     } catch (error) {
       console.error('Error adding product to cart:', error);
     }
-    if (response.ok) {
-      toast.success('Đã thêm vào giỏ hàng');
-    } else {
-      toast.error('Không thể thêm vào giỏ');
-    }     
   }
 
   return (

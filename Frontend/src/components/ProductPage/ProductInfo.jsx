@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StarIcon, HeartIcon, ShoppingCartIcon, MinusIcon, PlusIcon } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const formatCurrency = (amount) => {
   if (typeof amount !== 'number' || isNaN(amount)) {
@@ -9,8 +10,10 @@ const formatCurrency = (amount) => {
 };
 
 export default function ProductInfo({ product }) {
+  console.log('Rendering ProductInfo with product:', product);
   const [quantity, setQuantity] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false); 
+  const navigate = useNavigate();
 
   if (!product) {
     return (
@@ -33,9 +36,42 @@ export default function ProductInfo({ product }) {
       }
     }
   };
+//CHECK LAI 
+  const handleAddToCart = async (productId, quantity) => {
+    //console.log(`Thêm vào giỏ hàng: ID ${productId}, Số lượng: ${quantity}`);
+    const token = localStorage.getItem('token');
 
-  const handleAddToCart = () => {
+    if (!token) {
+      console.error('No access token found. Please log in first.');
+      navigate('/login'); // Chuyển hướng đến trang đăng nhập
+      return;
+    }
+    try {
+      const response = await fetch(`/api/carts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+        },
+        body: JSON.stringify({ 
+          productId: productId,
+          quantity: quantity, 
+        }),
+      });
+
+      const result = await response.json();
+      console.log(`Adding product ${productId} to cart`);
+    } catch (error) {
+      console.error('Error adding product to cart:', error);
+    }
+    
     console.log(`Thêm vào giỏ hàng: ID ${product.id}, Tên ${product.name}, Số lượng: ${quantity}`);
+    if (response.ok) {
+      alert('Đã thêm vào giỏ hàng!');
+    } else {
+      alert('Thêm vào giỏ hàng thất bại!');
+    }
+
   };
 
   const handleAddToWishlist = () => {
@@ -150,7 +186,7 @@ export default function ProductInfo({ product }) {
         
         <button
           type="button"
-          onClick={handleAddToCart}
+          onClick={() => handleAddToCart(product.id, quantity)}
           disabled={typeof product.stock === 'number' && product.stock === 0}
           className="w-full sm:flex-1 bg-gray-800 hover:bg-gray-900 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:shadow-lg transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 active:scale-95 text-base disabled:opacity-50 disabled:cursor-not-allowed"
         >

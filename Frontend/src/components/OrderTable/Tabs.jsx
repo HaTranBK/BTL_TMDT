@@ -6,7 +6,7 @@ const labels = [
   { text: 'Vận chuyển', responsive: 'hidden sm:inline' },
   { text: 'Giao hàng', responsive: 'hidden md:inline' },
   { text: 'Hoàn thành', responsive: 'hidden md:inline' },
-  { text: 'Đã huỷ', responsive: 'hidden lg:inline' },
+  { text: 'Đã hủy', responsive: 'hidden lg:inline' },
   { text: 'Trả hàng', responsive: 'hidden lg:inline' },
 ];
 

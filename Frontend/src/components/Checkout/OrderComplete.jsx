@@ -127,7 +127,8 @@ const OrderComplete = () => {
                                 </div>
                             </div>
                         </div>
-                        <button className="bg-black w-[203px] h-[52px] text-white py-2 px-4 rounded-full">Purchase history</button>
+                        <button onClick={() => window.location.href = '../myaccount'}
+                        className="bg-black w-[203px] h-[52px] text-white py-2 px-4 rounded-full">Purchase history</button>
                     </div>
                 </div>
             </div>
