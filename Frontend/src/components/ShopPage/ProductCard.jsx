@@ -10,11 +10,11 @@ export default function ProductCard({ product }) {
   const [isHovered, setIsHovered] = useState(false);
   const navigate = useNavigate();
 
-  let discountPercentage = product.discount;
-  if (!discountPercentage && product.originalPrice && product.price && product.originalPrice > product.price) {
-    const diff = product.originalPrice - product.price;
-    discountPercentage = Math.round((diff / product.originalPrice) * 100) + '%';
-  }
+  // let discountPercentage = product.discount;
+  // if (!discountPercentage && product.originalPrice && product.price && product.originalPrice > product.price) {
+  //   const diff = product.originalPrice - product.price;
+  //   discountPercentage = Math.round((diff / product.originalPrice) * 100) + '%';
+  // }
 
   const handleCardClick = () => {
     navigate(`/product/${product.id}`); // Chuyển hướng đến trang chi tiết sản phẩm
@@ -78,9 +78,9 @@ export default function ProductCard({ product }) {
           {product.isNew && (
             <span className="px-2.5 py-1 text-xs font-semibold text-white bg-green-500 rounded-full shadow-md">MỚI</span>
           )}
-          {discountPercentage && (
+          {/* {discountPercentage && (
             <span className="px-2.5 py-1 text-xs font-semibold text-white bg-red-500 rounded-full shadow-md">-{discountPercentage}</span>
-          )}
+          )} */}
         </div>
         {product.ecoBadge && (
             <span className="absolute top-3 right-3 px-2.5 py-1 text-xs font-semibold text-green-700 bg-green-100 border border-green-200 rounded-md shadow-sm z-10">
@@ -135,9 +135,9 @@ export default function ProductCard({ product }) {
         )}
         <div className="flex items-baseline space-x-2">
           <p className="text-xl font-bold text-primary-green">{formatCurrency(product.price)}</p>
-          {product.originalPrice && product.originalPrice > product.price && (
+          {/* {product.originalPrice && product.originalPrice > product.price && (
             <p className="text-sm text-gray-400 line-through">{formatCurrency(product.originalPrice)}</p>
-          )}
+          )} */}
         </div>
       </div>
     </div>

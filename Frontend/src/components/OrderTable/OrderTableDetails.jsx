@@ -29,7 +29,7 @@ export default function OrderTableDetails({
         <OrderDetails
           order={selected}
           onBack={() => setSelected(null)}
-          onCancelOrder={onCancelOrder}
+          // onCancelOrder={onCancelOrder}
           updateLoading={updateLoading}
         />
       )}

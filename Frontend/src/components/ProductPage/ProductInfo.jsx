@@ -79,8 +79,13 @@ export default function ProductInfo({ product }) {
     console.log(`Thay đổi trạng thái yêu thích cho: ID ${product.id}, Tên ${product.name}. Hiện tại: ${!isWishlisted ? 'Đã yêu thích' : 'Bỏ yêu thích'}`);
   };
 
-  const currentPrice = product.price;
-  const originalPriceToShow = product.originalPrice;
+  const currentPrice = product.originalPrice ;
+  const originalPriceToShow = currentPrice + 10000;
+
+  console.log('Current Price:', currentPrice);
+  console.log('Original Price to Show:', originalPriceToShow);
+  console.log('typeof currentPrice:', typeof product.currentPrice); // string?
+
 
   return (
     <div className="space-y-5">
@@ -115,11 +120,11 @@ export default function ProductInfo({ product }) {
         <span className="text-3xl md:text-4xl font-extrabold text-gray-900">
           {formatCurrency(currentPrice)}
         </span>
-        {originalPriceToShow && originalPriceToShow > currentPrice && (
+        
           <span className="ml-3 text-lg text-gray-400 line-through">
             {formatCurrency(originalPriceToShow)}
           </span>
-        )}
+        
       </div>
 
       {product.categoryName && <p className="text-sm text-gray-500 pt-2"><strong>Phân loại:</strong> {product.categoryName}</p>}
