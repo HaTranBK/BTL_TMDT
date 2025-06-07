@@ -51,8 +51,9 @@ const CustomRoute = () => {
       path: "/failed",
       element: <Failed />, 
     },
+
     {
-        path: "/callback/payment",
+      path: "/callback/payment",
       element: <CallBackPayment />,
     },
   ]);
