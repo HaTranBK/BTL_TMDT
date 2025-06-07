@@ -32,7 +32,7 @@ export default function OrderDetails({ order, onBack }) {
           {order.items.map((item, idx) => (
             <tr key={idx} className="border-t">
               <td className="py-3 px-4 flex items-center gap-4">
-                <img src={item.image} alt={item.name} className="w-16 h-16 rounded object-cover" />
+                {/* <img src={item.image} alt={item.name} className="w-16 h-16 rounded object-cover" /> */}
                 <div>
                   <div className="font-medium">{item.name}</div>
                   {item.color && <div className="text-sm text-gray-500">Màu: {item.color}</div>}
