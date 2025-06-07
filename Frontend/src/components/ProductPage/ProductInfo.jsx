@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { StarIcon, HeartIcon, ShoppingCartIcon, MinusIcon, PlusIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 const formatCurrency = (amount) => {
   if (typeof amount !== 'number' || isNaN(amount)) {
@@ -47,6 +48,8 @@ export default function ProductInfo({ product }) {
       return;
     }
     try {
+            toast.success(`Đã thêm vào giỏ hàng!`);
+
       const response = await fetch(`/api/carts`, {
         method: 'POST',
         headers: {
@@ -58,9 +61,9 @@ export default function ProductInfo({ product }) {
           quantity: quantity, 
         }),
       });
-
+      
       const result = await response.json();
-      console.log(`Adding product ${productId} to cart`);
+      // console.log(`Adding product ${productId} to cart`);
     } catch (error) {
       console.error('Error adding product to cart:', error);
     }

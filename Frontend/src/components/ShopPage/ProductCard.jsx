@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StarIcon, ShoppingCartIcon, HeartIcon, SearchIcon } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const formatCurrency = (amount) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
@@ -36,7 +37,8 @@ export default function ProductCard({ product }) {
       return;
     }
     try {
-      const response = await fetch(`/api/carts`, {
+      toast.success(`Đã thêm vào giỏ hàng!`);
+      const response = await fetch(`https://be-tm-t.onrender.com/carts`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,6 +50,7 @@ export default function ProductCard({ product }) {
         }),
       });
 
+      
       const result = await response.json();
       // Giả lập thêm sản phẩm vào giỏ hàng
       console.log(`Adding product ${productId} to cart`);
