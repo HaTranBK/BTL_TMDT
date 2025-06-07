@@ -11,6 +11,7 @@ import Success from "../pages/PaymentSuccessPage.jsx";
 import Failed from "../pages/PaymentFailedPage.jsx"; // Assuming you have a PaymentFailedPage
 
 import UserProfilePage from "../pages/UserProfilePage.jsx";
+import CallBackPayment from "../pages/CallBackPayment.jsx";
 
 const CustomRoute = () => {
   let routeElements = useRoutes([
@@ -49,8 +50,11 @@ const CustomRoute = () => {
     {
       path: "/failed",
       element: <Failed />, 
-    }
-
+    },
+    {
+        path: "/callback/payment",
+      element: <CallBackPayment />,
+    },
   ]);
   return routeElements;
 };
