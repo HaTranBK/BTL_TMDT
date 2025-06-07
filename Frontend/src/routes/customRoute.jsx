@@ -8,6 +8,7 @@ import Checkout from "../pages/Checkout.jsx";
 import ShopPage from "../pages/ShopPage.jsx";
 import ProductDetailPage from "../pages/ProductDetailPage.jsx";
 import UserProfilePage from "../pages/UserProfilePage.jsx";
+import CallBackPayment from "../pages/CallBackPayment.jsx";
 
 const CustomRoute = () => {
   let routeElements = useRoutes([
@@ -39,7 +40,10 @@ const CustomRoute = () => {
       path: "/product/:productId",
       element: <ProductDetailPage />,
     },
-
+    {
+      path: "/callback/payment",
+      element: <CallBackPayment />,
+    },
   ]);
   return routeElements;
 };
