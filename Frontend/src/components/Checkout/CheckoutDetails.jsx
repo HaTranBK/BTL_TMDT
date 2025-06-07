@@ -180,13 +180,13 @@ const CheckoutDetails = ({ onNext }) => {
         body: JSON.stringify({
             amount: result.data.order.total_price,
             orderId: result.data.order.id,
-            bankCode: "" // Hoặc "INTCARD" nếu bạn muốn thanh toán quốc tế
+            bankCode: formData.paymentMethod
         }),
         });
 
         const paymentData = await paymentRes.json();
         if (paymentData.code === "0") {
-        window.location.href = paymentData.data; // Chuyển sang trang thanh toán VNPAY
+        window.location.href = paymentData.data; 
         return;
         } else {
         alert("Không thể tạo liên kết thanh toán.");
