@@ -11,6 +11,8 @@ const CheckoutDetails = ({ onNext }) => {
     const [discount, setDiscount] = useState(null);
     const [error, setError] = useState('');
 
+    const [paymentMethod, setPaymentMethod] = useState('VNBANK'); 
+
     const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -30,6 +32,8 @@ const CheckoutDetails = ({ onNext }) => {
         if (typeof num !== "number") num = Number(num);
         return num.toLocaleString('vi-VN');
     };
+
+    
 
     useEffect(() => {
         fetchCart();
@@ -122,71 +126,94 @@ const CheckoutDetails = ({ onNext }) => {
   };
 
     const handleSubmitOrder = async () => {
-        if (!validate()) return;
-        const token = localStorage.getItem('token');
-        try {
-            setLoading(true);
-            // Bước 1: Lấy dữ liệu giỏ hàng
-            const cartRes = await fetch(`https://be-tm-t.onrender.com/carts`, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                }
-            });
-            if (!cartRes.ok) throw new Error('Failed to fetch cart');
+    if (!validate()) return;
+    const token = localStorage.getItem('token');
 
-            const cartData = await cartRes.json();
-            const productsInCart = cartData.data.cart.Products;
+    try {
+        setLoading(true);
 
-            // Bước 2: Tạo dữ liệu đơn hàng
-            const orderData = {
-                products: productsInCart.map(product => ({
-                    productId: product.id,
-                    quantity: product.quantity,
-                })),
-                voucherCodes: [
-                    validCode
-                ]
-            };
-
-            // Bước 3: Gửi đơn hàng
-            const orderRes = await fetch(`https://be-tm-t.onrender.com/orders`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(orderData),
-            });
-
-            if (!orderRes.ok) throw new Error('Failed to submit order');
-
-            const result = await orderRes.json();
-            console.log('Order submitted successfully:', result);
-            localStorage.setItem('latestOrderId', result.data.order.id);
-            // console.log('Order ID:', result.data.order.id);
-
-            // Bước 4: Xoá từng sản phẩm trong giỏ hàng
-            await Promise.all(
-                productsInCart.map(product =>
-                    fetch(`https://be-tm-t.onrender.com/carts/${product.id}`, {
-                        method: 'DELETE',
-                        headers: {
-                            Authorization: `Bearer ${token}`,
-                            "Content-Type": "application/json"
-                        }
-                    })
-                )
-            );
-
-        } catch (error) {
-            console.error('Error submitting order:', error.message);
-        } finally {
-            // TODO: navigate to success screen
-            onNext();
-            setLoading(false);
+        // Bước 1: Lấy dữ liệu giỏ hàng
+        const cartRes = await fetch(`https://be-tm-t.onrender.com/carts`, {
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
         }
+        });
+        if (!cartRes.ok) throw new Error('Failed to fetch cart');
+
+        const cartData = await cartRes.json();
+        const productsInCart = cartData.data.cart.Products;
+
+        // Bước 2: Tạo đơn hàng
+        const orderData = {
+        products: productsInCart.map(product => ({
+            productId: product.id,
+            quantity: product.quantity,
+        })),
+        voucherCodes: [validCode]
+        };
+
+        const orderRes = await fetch(`https://be-tm-t.onrender.com/orders`, {
+        method: 'POST',
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderData),
+        });
+
+        if (!orderRes.ok) throw new Error('Failed to submit order');
+
+        const result = await orderRes.json();
+        const orderId = result.data.order.id;
+        const totalAmount = result.data.order.totalPrice;
+
+        localStorage.setItem('latestOrderId', orderId);
+        console.log('Order submitted successfully:', result);
+
+        // Gọi API thanh toán
+        const paymentRes = await fetch(`https://be-tm-t.onrender.com/payment/checkout`, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            amount: result.data.order.total_price,
+            orderId: result.data.order.id,
+            bankCode: "" // Hoặc "INTCARD" nếu bạn muốn thanh toán quốc tế
+        }),
+        });
+
+        const paymentData = await paymentRes.json();
+        if (paymentData.code === "0") {
+        window.location.href = paymentData.data; // Chuyển sang trang thanh toán VNPAY
+        return;
+        } else {
+        alert("Không thể tạo liên kết thanh toán.");
+        }
+
+        // Bước 4: Xoá từng sản phẩm trong giỏ hàng
+        await Promise.all(
+        productsInCart.map(product =>
+            fetch(`https://be-tm-t.onrender.com/carts/${product.id}`, {
+            method: 'DELETE',
+            headers: {
+                Authorization: `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+            })
+        )
+        );
+        console.log(response);
+
+    } catch (error) {
+        console.error('Error submitting order:', error.message);
+    } finally {
+        setLoading(false);
+        onNext(); // 👉 Có thể bỏ nếu không muốn chuyển bước sau khi redirect VNPAY
+    }
     };
+
 
     if (loading) return (
         <div className="flex justify-center items-center h-64">
@@ -236,43 +263,6 @@ const CheckoutDetails = ({ onNext }) => {
                 <div className="flex gap-[64px] mt-[80px]">
                     <div>
                         <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
-                            {/* Contact Information */}
-                            {/* <h2 className="text-xl font-bold mb-4 mt-[8px]">Contact Information</h2>
-                            <div className="mb-4">
-                                <input type="text" placeholder="First name" className="border rounded-[6px] p-2 w-full mb-2" />
-                                <input type="text" placeholder="Last name" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-                            <div className="mb-4">
-                                <input type="text" placeholder="Phone number" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-                            <div className="mb-4">
-                                <input type="email" placeholder="Your Email" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-                            </div>
-                            <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
-                                <h2 className="text-xl font-bold mb-4 mt-[8px]">Shipping Address</h2>
-                                <div className="mb-4">
-                                    <input type="text" placeholder="Street Address" className="border rounded-[6px] p-2 w-full" />
-                                </div>
-                                <div className="mb-4">
-                                    <select className="border rounded-[6px] p-2 w-full">
-                                        <option>Vietnam</option>
-                                    </select>
-                                </div>
-                                <div className="mb-4">
-                                    <input type="text" placeholder="Town / City" className="border rounded-[6px] p-2 w-full" />
-                                </div>
-                                <div className="grid grid-cols-2 gap-4 mb-4">
-                                    <input type="text" placeholder="State" className="border rounded-[6px] p-2 w-full" />
-                                    <input type="text" placeholder="Zip Code" className="border rounded-[6px] p-2 w-full" />
-                                </div>
-                                <div className="mb-4">
-                                    <input type="checkbox" id="billing-address" className="mr-2" />
-                                    <label htmlFor="billing-address">Use a different billing address (optional)</label>
-                                </div>
-                            </div>
-                            */}
-
                         <h2 className="text-xl font-bold mb-4 mt-[8px]">Contact Information</h2>
                         <div className="mb-4">
                             <input
@@ -384,44 +374,24 @@ const CheckoutDetails = ({ onNext }) => {
                             id="card"
                             name="paymentMethod"
                             className="mr-2"
-                            value="card"
-                            checked={formData.paymentMethod === 'card'}
+                            value="VNBANK"
+                            checked={formData.paymentMethod === 'VNBANK'}
                             onChange={handleInputChange}
                             />
-                            <label htmlFor="card">Pay by Card Credit</label>
+                            <label htmlFor="vnbank">Thanh toán ngân hàng</label>
                         </div>
                         <div className="mb-4">
-                            <input
+                        <input
                             type="radio"
-                            id="paypal"
+                            id="intcard"
                             name="paymentMethod"
                             className="mr-2"
-                            value="paypal"
-                            checked={formData.paymentMethod === 'paypal'}
+                            value="INTCARD"
+                            checked={formData.paymentMethod === 'INTCARD'}
                             onChange={handleInputChange}
-                            />
-                            <label htmlFor="paypal">Paypal</label>
+                        />
+                        <label htmlFor="intcard">Thanh toán quốc tế</label>
                         </div>
-
-                        {/* <div className='p-[24px] rounded-[4px] border-[1px] border-[#6C7275] w-[643px] mb-[16px]'>
-                            <h2 className="text-xl font-bold mb-4 mt-[8px]">Payment method</h2>
-                            <div className="mb-4">
-                                <input type="radio" id="card" name="payment" className="mr-2" />
-                                <label htmlFor="card">Pay by Card Credit</label>
-                            </div>
-                            <div className="mb-4">
-                                <input type="radio" id="paypal" name="payment" className="mr-2" />
-                                <label htmlFor="paypal">Paypal</label>
-                            </div>
-                            <div className="mb-4">
-                                <input type="text" placeholder="Card Number" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4 mb-4">
-                                <input type="text" placeholder="MM/YY" className="border rounded-[6px] p-2 w-full" />
-                                <input type="text" placeholder="CVC code" className="border rounded-[6px] p-2 w-full" />
-                            </div>
-
-                        </div> */}
 
                     {formErrors.paymentMethod && <p className="text-red-500 text-sm">{formErrors.paymentMethod}</p>}
                     {formData.paymentMethod === 'card' && (
@@ -516,9 +486,7 @@ const CheckoutDetails = ({ onNext }) => {
                                 </p>
                             </div>
                         )}
-                        {/* <div className="mb-4">
-                            <p className="text-green-500">JankataWIN -25.000 <button className="text-red-500">(Remove)</button></p>
-                        </div> */}
+
                         <div className="border-t mt-2 pt-2">
                             <div className="flex justify-between pb-3 border-b">
                                 <span>Shipping</span>
