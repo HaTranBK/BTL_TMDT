@@ -3,7 +3,7 @@ import React from 'react';
 const labels = [
   { text: 'Tất cả', value: 'Tất cả', responsive: '' },
   { text: 'Chờ xác nhận', value: 'pending', responsive: '' },
-  { text: 'Thành công', value: 'success', responsive: 'hidden sm:inline' },
+  { text: 'Thành công', value: 'Hoàn thành', responsive: 'hidden sm:inline' },
   { text: 'Thất bại', value: 'failed', responsive: 'hidden md:inline' },
 ];
 
