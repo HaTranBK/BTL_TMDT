@@ -285,7 +285,7 @@ const ShoppingCart = ({ onNext }) => {
                         <button onClick={onNext} className="bg-black text-white w-full h-[48px] rounded-[8px] py-2 mt-4">Checkout</button>
                     </div>
                 </div>
-                <div className="flex justify-between items-center mt-6">
+                {/* <div className="flex justify-between items-center mt-6">
                     <div>
                         <p className="mb-2 text-[20px]">Have a coupon?</p>
                         <p className='text-[#6C7275]'>Add your code for an instant cart discount</p>
@@ -294,7 +294,7 @@ const ShoppingCart = ({ onNext }) => {
                             <button className="bg-black text-white w-full h-[48px] rounded-[8px]">Apply</button>
                         </div>
                     </div>
-                </div>
+                </div> */}
             </div>
         </div >
     );
