@@ -109,7 +109,13 @@ export default function AccountPage() {
     if (window.confirm("Bạn có chắc chắn muốn hủy đơn hàng này?")) {
       await updateOrderStatus(order.orderId, "cancelled");
     }
-  };
+  };  
+
+  useEffect(() => {
+    if (error) {
+      navigate("/login");
+    }
+  }, [error, navigate]);
 
   useEffect(() => {
     fetchOrders();
@@ -128,7 +134,7 @@ export default function AccountPage() {
               {loading ? (
                 <div className="text-center py-4">Đang tải...</div>
               ) : error ? (
-                <div className="text-red-500 text-center py-4">{error}</div>
+                <div className="text-blue-500 text-center py-4">{error}</div>
               ) : (
                 <OrderTableDetails
                   orders={orders}
