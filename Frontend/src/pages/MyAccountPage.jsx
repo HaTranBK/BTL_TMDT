@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Header from "../components/Header";
 import Menu from "../components/OrderTable/Menu";
 import Tabs from "../components/OrderTable/Tabs";
@@ -12,11 +13,13 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [updateLoading, setUpdateLoading] = useState(false);
+  const navigate = useNavigate();
 
   const fetchOrders = async () => {
     try {
       const token = localStorage.getItem("token");
       if (!token) {
+        navigate("/login");
         throw new Error("No authentication token found");
       }
 
@@ -69,6 +72,7 @@ export default function AccountPage() {
       setUpdateLoading(true);
       const token  = localStorage.getItem("token");
       if (!token) {
+        navigate("/login");
         throw new Error("No authentication token found");
       }
 
