@@ -33,10 +33,10 @@ const CallBackPayment = () => {
 
         // TODO: Navigate 2 page thanh toan thanh cong hay that bai giùm tui nha ^^
         if (vnp_Params['vnp_ResponseCode'] === '00') {
-            console.log('Thanh toán thành công');
+            navigate("/success")
         } else {
             // Thất bại
-            console.log('Thanh toán thất bại');
+           navigate("/failed")
         }
   }, [location.search, navigate]);
 
