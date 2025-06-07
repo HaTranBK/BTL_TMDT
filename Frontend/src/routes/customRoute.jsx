@@ -7,6 +7,9 @@ import MyAccount from "../pages/MyAccountPage.jsx";
 import Checkout from "../pages/Checkout.jsx";
 import ShopPage from "../pages/ShopPage.jsx";
 import ProductDetailPage from "../pages/ProductDetailPage.jsx";
+import Success from "../pages/PaymentSuccessPage.jsx"; 
+import Failed from "../pages/PaymentFailedPage.jsx"; // Assuming you have a PaymentFailedPage
+
 import UserProfilePage from "../pages/UserProfilePage.jsx";
 
 const CustomRoute = () => {
@@ -39,6 +42,14 @@ const CustomRoute = () => {
       path: "/product/:productId",
       element: <ProductDetailPage />,
     },
+    {
+      path: "/success",
+      element: <Success/>,
+    },
+    {
+      path: "/failed",
+      element: <Failed />, 
+    }
 
   ]);
   return routeElements;
