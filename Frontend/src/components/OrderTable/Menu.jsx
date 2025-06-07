@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import avatar from "../../assets/user-avatar.png";
 import UserProfilePage from "../../pages/UserProfilePage";
@@ -43,6 +43,10 @@ export default function Menu() {
     setShowAddressPopup(false);
     setError(null);
   };
+  useEffect(() => {
+    fetchProfile(); // Tự động gọi khi component mount
+  }, []);
+
 
   return (
     <div className="relative">
@@ -55,7 +59,7 @@ export default function Menu() {
               className="h-full w-full object-cover"
             />
           </div>
-          <h2 className="mt-2 font-medium">Sofia Havertz</h2>
+          <h2 className="mt-2 font-medium">{profile?.fullname || "Người dùng"}</h2>
         </div>
         <ul className="space-y-3 text-gray-700">
           <li>
