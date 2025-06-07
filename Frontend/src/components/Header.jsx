@@ -51,8 +51,8 @@ export default function Header() {
         <nav className="flex space-x-8">
           <Link to="/" className="hover:underline">Home</Link>
           <Link to="/shop" className="hover:underline">Cửa hàng</Link>
-          <Link to="/blog" className="hover:underline hidden md:inline">Blog</Link>
-          <Link to="/contact" className="hover:underline hidden lg:inline">Liên hệ với chúng tôi</Link>
+          {/* <Link to="/blog" className="hover:underline hidden md:inline">Blog</Link>
+          <Link to="/contact" className="hover:underline hidden lg:inline">Liên hệ với chúng tôi</Link> */}
         </nav>
 
         <div className="flex items-center space-x-4 lg:space-x-8">
