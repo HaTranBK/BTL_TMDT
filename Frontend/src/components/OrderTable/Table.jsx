@@ -70,7 +70,7 @@ export default function Table({
                         updateLoading ? "opacity-50 cursor-not-allowed" : ""
                       }`}
                     >
-                      {updateLoading ? "Đang xử lý..." : "Hủy đơn"}
+                      {updateLoading ? "Đang xử lý..." : ""}
                     </button>
                   )}
                 </div>
