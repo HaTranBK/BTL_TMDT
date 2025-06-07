@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import logo from '../assets/logo.png';
 import { Search, User, ShoppingCart, X } from "lucide-react";
 import UserProfilePage from '../pages/UserProfilePage';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const navigate = useNavigate();
@@ -49,11 +49,12 @@ export default function Header() {
           <span className="font-semibold text-xl">Greeniez</span>
         </div>
         <nav className="flex space-x-8">
-          <a href="/" className="hover:underline">Home</a>
-          <a href="/shop" className="hover:underline">Cửa hàng</a>
-          <a href="/blog" className="hover:underline hidden md:inline">Blog</a>
-          <a href="/contact" className="hover:underline hidden lg:inline">Liên hệ với chúng tôi</a>
+          <Link to="/" className="hover:underline">Home</Link>
+          <Link to="/shop" className="hover:underline">Cửa hàng</Link>
+          <Link to="/blog" className="hover:underline hidden md:inline">Blog</Link>
+          <Link to="/contact" className="hover:underline hidden lg:inline">Liên hệ với chúng tôi</Link>
         </nav>
+
         <div className="flex items-center space-x-4 lg:space-x-8">
 
           {!searchActive && (
